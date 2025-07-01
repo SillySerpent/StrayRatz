@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 from config import Config
 
 # Initialize extensions
@@ -10,6 +11,7 @@ login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
 migrate = Migrate()
+csrf = CSRFProtect()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -18,6 +20,11 @@ def create_app(config_class=Config):
     # Initialize extensions with app
     db.init_app(app)
     login_manager.init_app(app)
+    csrf.init_app(app)
+    
+    # Exempt some routes from CSRF protection
+    csrf.exempt('app.routes.newsletter_subscribe')
+    
     migrate.init_app(app, db)
     
     # Register blueprints

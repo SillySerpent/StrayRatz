@@ -3,7 +3,7 @@ from datetime import timedelta
 
 class Config:
     # Secret key for forms and secure sessions
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'jsdaglwbuh4piugeirablgjk4/twt/3t;j3glre48o;r4j43tj/er;gwpu'
     
     # Database configuration
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///site.db'

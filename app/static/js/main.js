@@ -1,9 +1,22 @@
 // StrayRatz JavaScript Functionality
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Navbar scroll behavior
+    const navbar = document.querySelector('.navbar');
+    
+    if (navbar) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    }
+    
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+        anchor.addEventListener('click', function (e) {
             e.preventDefault();
             
             const targetId = this.getAttribute('href');
@@ -12,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
                 window.scrollTo({
-                    top: targetElement.offsetTop - 70,
+                    top: targetElement.offsetTop - 80, // Adjust for navbar height
                     behavior: 'smooth'
                 });
             }
@@ -110,4 +123,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial check and add scroll event
     animateOnScroll();
     window.addEventListener('scroll', animateOnScroll);
+
+    // Flavor selector in product section
+    const flavorButtons = document.querySelectorAll('.flavor-btn');
+    
+    if (flavorButtons.length > 0) {
+        flavorButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                flavorButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+            });
+        });
+    }
 }); 

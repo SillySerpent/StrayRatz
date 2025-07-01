@@ -55,7 +55,8 @@
                                 <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="#">My Profile</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.profile') }}">My Profile</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('main.my_surveys') }}">My Surveys</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ url_for('main.logout') }}">Logout</a></li>
                             </ul>

@@ -16,6 +16,14 @@ class User(db.Model, UserMixin):
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Profile fields
+    first_name = db.Column(db.String(64), nullable=True)
+    last_name = db.Column(db.String(64), nullable=True)
+    bio = db.Column(db.Text, nullable=True)
+    location = db.Column(db.String(128), nullable=True)
+    fitness_goals = db.Column(db.String(128), nullable=True)
+    fitness_level = db.Column(db.String(32), nullable=True)
+    
     surveys = db.relationship('Survey', backref='user', lazy=True)
     
     def set_password(self, password):
@@ -45,6 +53,16 @@ class Survey(db.Model):
     interest_level = db.Column(db.Integer, nullable=False)
     price_preference = db.Column(db.String(64), nullable=True)
     heard_from = db.Column(db.String(64), nullable=True)
+    
+    # Enhanced survey fields
+    effectiveness_rating = db.Column(db.Integer, nullable=True)
+    value_rating = db.Column(db.Integer, nullable=True)
+    convenience_rating = db.Column(db.Integer, nullable=True)
+    specific_needs = db.Column(db.Text, nullable=True)
+    pain_points = db.Column(db.Text, nullable=True)
+    expected_benefits = db.Column(db.Text, nullable=True)
+    purchase_likelihood = db.Column(db.Integer, nullable=True)
+    
     additional_comments = db.Column(db.Text, nullable=True)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
     

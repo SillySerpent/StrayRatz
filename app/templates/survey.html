@@ -2,92 +2,270 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-md-10">
         <div class="card">
             <div class="card-header bg-dark text-white">
                 <h4 class="mb-0">StrayRatz Product Survey</h4>
             </div>
             <div class="card-body">
                 <p class="lead">Help us shape the future of StrayRatz by sharing your thoughts on our all-in-one supplement solution.</p>
+                
                 <form method="POST" action="">
                     {{ form.hidden_tag() }}
                     
-                    <div class="row mb-4">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <div class="form-group">
-                                {{ form.name.label(class="form-label") }}
-                                {% if form.name.errors %}
-                                    {{ form.name(class="form-control is-invalid") }}
-                                    <div class="invalid-feedback">
-                                        {% for error in form.name.errors %}
-                                            <span>{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    {{ form.name(class="form-control") }}
-                                {% endif %}
+                    <div class="progress mb-4">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" id="survey-progress"></div>
+                    </div>
+                    
+                    <!-- Basic Info Section -->
+                    <div class="survey-section active" id="section-1" data-progress="20">
+                        <h5 class="section-title mb-4">Your Information</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <div class="form-group">
+                                    {{ form.name.label(class="form-label") }}
+                                    {% if form.name.errors %}
+                                        {{ form.name(class="form-control is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.name.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {{ form.name(class="form-control") }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.email.label(class="form-label") }}
+                                    {% if form.email.errors %}
+                                        {{ form.email(class="form-control is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.email.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {{ form.email(class="form-control") }}
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                {{ form.email.label(class="form-label") }}
-                                {% if form.email.errors %}
-                                    {{ form.email(class="form-control is-invalid") }}
-                                    <div class="invalid-feedback">
-                                        {% for error in form.email.errors %}
-                                            <span>{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    {{ form.email(class="form-control") }}
-                                {% endif %}
-                            </div>
+                        
+                        <div class="form-group mb-4">
+                            {{ form.current_supplements.label(class="form-label") }}
+                            {{ form.current_supplements(class="form-select") }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-primary next-section">Next <i class="fas fa-arrow-right ms-1"></i></button>
                         </div>
                     </div>
                     
-                    <div class="form-group mb-4">
-                        {{ form.current_supplements.label(class="form-label") }}
-                        {{ form.current_supplements(class="form-select") }}
+                    <!-- Interest & Importance Section -->
+                    <div class="survey-section" id="section-2" data-progress="40">
+                        <h5 class="section-title mb-4">Your Preferences</h5>
+                        
+                        <div class="form-group mb-4">
+                            <label class="form-label">{{ form.interest_level.label }}</label>
+                            <div class="interest-level-container rating-group">
+                                {% for subfield in form.interest_level %}
+                                    <div class="form-check form-check-inline">
+                                        {{ subfield(class="form-check-input") }}
+                                        {{ subfield.label(class="form-check-label") }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label class="form-label">{{ form.effectiveness_rating.label }}</label>
+                            <div class="rating-group">
+                                {% for subfield in form.effectiveness_rating %}
+                                    <div class="form-check form-check-inline">
+                                        {{ subfield(class="form-check-input") }}
+                                        {{ subfield.label(class="form-check-label") }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label class="form-label">{{ form.value_rating.label }}</label>
+                            <div class="rating-group">
+                                {% for subfield in form.value_rating %}
+                                    <div class="form-check form-check-inline">
+                                        {{ subfield(class="form-check-input") }}
+                                        {{ subfield.label(class="form-check-label") }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label class="form-label">{{ form.convenience_rating.label }}</label>
+                            <div class="rating-group">
+                                {% for subfield in form.convenience_rating %}
+                                    <div class="form-check form-check-inline">
+                                        {{ subfield(class="form-check-input") }}
+                                        {{ subfield.label(class="form-check-label") }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            {{ form.price_preference.label(class="form-label") }}
+                            {{ form.price_preference(class="form-select") }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary prev-section"><i class="fas fa-arrow-left me-1"></i> Previous</button>
+                            <button type="button" class="btn btn-primary next-section">Next <i class="fas fa-arrow-right ms-1"></i></button>
+                        </div>
                     </div>
                     
-                    <div class="form-group mb-4">
-                        <label class="form-label">{{ form.interest_level.label }}</label>
-                        <div class="interest-level-container">
-                            {% for subfield in form.interest_level %}
-                                <div class="form-check form-check-inline">
+                    <!-- Detailed Feedback Section -->
+                    <div class="survey-section" id="section-3" data-progress="70">
+                        <h5 class="section-title mb-4">Tell Us More</h5>
+                        
+                        <div class="form-group mb-4">
+                            {{ form.specific_needs.label(class="form-label") }}
+                            {{ form.specific_needs(class="form-control", rows=3) }}
+                            <small class="form-text text-muted">Examples: Energy boost, recovery, muscle gain, etc.</small>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            {{ form.pain_points.label(class="form-label") }}
+                            {{ form.pain_points(class="form-control", rows=3) }}
+                            <small class="form-text text-muted">Examples: Too expensive, bad taste, too many pills, etc.</small>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            {{ form.expected_benefits.label(class="form-label") }}
+                            {{ form.expected_benefits(class="form-control", rows=3) }}
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label class="form-label">{{ form.purchase_likelihood.label }}</label>
+                            <div class="rating-group">
+                                {% for subfield in form.purchase_likelihood %}
+                                    <div class="form-check form-check-inline">
+                                        {{ subfield(class="form-check-input") }}
+                                        {{ subfield.label(class="form-check-label") }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary prev-section"><i class="fas fa-arrow-left me-1"></i> Previous</button>
+                            <button type="button" class="btn btn-primary next-section">Next <i class="fas fa-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+                    
+                    <!-- Final Section -->
+                    <div class="survey-section" id="section-4" data-progress="100">
+                        <h5 class="section-title mb-4">Final Thoughts</h5>
+                        
+                        <div class="form-group mb-4">
+                            <label class="form-label">{{ form.heard_from.label }}</label>
+                            {% for subfield in form.heard_from %}
+                                <div class="form-check">
                                     {{ subfield(class="form-check-input") }}
                                     {{ subfield.label(class="form-check-label") }}
                                 </div>
                             {% endfor %}
                         </div>
-                    </div>
-                    
-                    <div class="form-group mb-4">
-                        {{ form.price_preference.label(class="form-label") }}
-                        {{ form.price_preference(class="form-select") }}
-                    </div>
-                    
-                    <div class="form-group mb-4">
-                        <label class="form-label">{{ form.heard_from.label }}</label>
-                        {% for subfield in form.heard_from %}
-                            <div class="form-check">
-                                {{ subfield(class="form-check-input") }}
-                                {{ subfield.label(class="form-check-label") }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    
-                    <div class="form-group mb-4">
-                        {{ form.additional_comments.label(class="form-label") }}
-                        {{ form.additional_comments(class="form-control", rows=4) }}
-                    </div>
-                    
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        
+                        <div class="form-group mb-4">
+                            {{ form.additional_comments.label(class="form-label") }}
+                            {{ form.additional_comments(class="form-control", rows=4) }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary prev-section"><i class="fas fa-arrow-left me-1"></i> Previous</button>
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sections = document.querySelectorAll('.survey-section');
+        const progressBar = document.getElementById('survey-progress');
+        const nextButtons = document.querySelectorAll('.next-section');
+        const prevButtons = document.querySelectorAll('.prev-section');
+        
+        // Initialize with first section active
+        updateProgress(sections[0].dataset.progress);
+        
+        // Handle next button clicks
+        nextButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const currentSection = this.closest('.survey-section');
+                const currentIndex = Array.from(sections).indexOf(currentSection);
+                
+                if (currentIndex < sections.length - 1) {
+                    currentSection.classList.remove('active');
+                    sections[currentIndex + 1].classList.add('active');
+                    updateProgress(sections[currentIndex + 1].dataset.progress);
+                }
+            });
+        });
+        
+        // Handle previous button clicks
+        prevButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const currentSection = this.closest('.survey-section');
+                const currentIndex = Array.from(sections).indexOf(currentSection);
+                
+                if (currentIndex > 0) {
+                    currentSection.classList.remove('active');
+                    sections[currentIndex - 1].classList.add('active');
+                    updateProgress(sections[currentIndex - 1].dataset.progress);
+                }
+            });
+        });
+        
+        function updateProgress(value) {
+            progressBar.style.width = value + '%';
+            progressBar.setAttribute('aria-valuenow', value);
+        }
+    });
+</script>
+<style>
+    .survey-section {
+        display: none;
+    }
+    .survey-section.active {
+        display: block;
+    }
+    .rating-group {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+    }
+    .section-title {
+        color: #343a40;
+        border-bottom: 2px solid #f8f9fa;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    @media (max-width: 768px) {
+        .rating-group {
+            flex-direction: column;
+        }
+        .form-check-inline {
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
 {% endblock %} 

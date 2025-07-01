@@ -32,6 +32,21 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
+class ProfileForm(FlaskForm):
+    first_name = StringField('First Name', validators=[Length(max=64)])
+    last_name = StringField('Last Name', validators=[Length(max=64)])
+    bio = TextAreaField('About Me', validators=[Length(max=500)])
+    location = StringField('Location', validators=[Length(max=128)])
+    fitness_goals = StringField('Fitness Goals', validators=[Length(max=128)])
+    fitness_level = SelectField('Fitness Level', 
+                              choices=[
+                                  ('beginner', 'Beginner'),
+                                  ('intermediate', 'Intermediate'),
+                                  ('advanced', 'Advanced'),
+                                  ('professional', 'Professional/Athlete')
+                              ])
+    submit = SubmitField('Update Profile')
+
 class NewsletterForm(FlaskForm):
     name = StringField('Name (Optional)', validators=[Length(max=64)])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -61,6 +76,34 @@ class SurveyForm(FlaskForm):
                                   ('5', 'Extremely interested')
                               ], validators=[DataRequired()])
     
+    # Enhanced rating fields
+    effectiveness_rating = RadioField('How important is effectiveness to you when choosing supplements?',
+                                   choices=[
+                                       ('1', 'Not important'),
+                                       ('2', 'Slightly important'),
+                                       ('3', 'Moderately important'),
+                                       ('4', 'Very important'),
+                                       ('5', 'Extremely important')
+                                   ], validators=[DataRequired()])
+    
+    value_rating = RadioField('How important is value for money when choosing supplements?',
+                           choices=[
+                               ('1', 'Not important'),
+                               ('2', 'Slightly important'),
+                               ('3', 'Moderately important'),
+                               ('4', 'Very important'),
+                               ('5', 'Extremely important')
+                           ], validators=[DataRequired()])
+    
+    convenience_rating = RadioField('How important is convenience when choosing supplements?',
+                                 choices=[
+                                     ('1', 'Not important'),
+                                     ('2', 'Slightly important'),
+                                     ('3', 'Moderately important'),
+                                     ('4', 'Very important'),
+                                     ('5', 'Extremely important')
+                                 ], validators=[DataRequired()])
+    
     price_preference = SelectField('What price range would you consider reasonable for our all-in-one supplement?',
                                  choices=[
                                      ('under30', 'Under $30'),
@@ -69,6 +112,24 @@ class SurveyForm(FlaskForm):
                                      ('50to60', '$50-$60'),
                                      ('over60', 'Over $60')
                                  ])
+    
+    specific_needs = TextAreaField('What specific needs are you looking to address with supplements?',
+                                validators=[Length(max=500)])
+                                
+    pain_points = TextAreaField('What frustrates you most about current supplement options?',
+                             validators=[Length(max=500)])
+                             
+    expected_benefits = TextAreaField('What benefits would you expect from an all-in-one supplement?',
+                                   validators=[Length(max=500)])
+    
+    purchase_likelihood = RadioField('How likely would you be to purchase our all-in-one supplement?',
+                                  choices=[
+                                      ('1', 'Very unlikely'),
+                                      ('2', 'Somewhat unlikely'),
+                                      ('3', 'Neutral'),
+                                      ('4', 'Somewhat likely'),
+                                      ('5', 'Very likely')
+                                  ], validators=[DataRequired()])
     
     heard_from = RadioField('How did you hear about StrayRatz?',
                           choices=[

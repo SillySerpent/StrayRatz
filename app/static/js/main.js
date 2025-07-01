@@ -1,19 +1,99 @@
 // StrayRatz JavaScript Functionality
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Navbar scroll behavior
-    const navbar = document.querySelector('.navbar');
-    
-    if (navbar) {
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
+    // Initialize AOS
+    AOS.init({
+        duration: 800,
+        easing: 'ease-in-out',
+        once: true
+    });
+
+    // Simple newsletter popup logic - show only once
+    if (!localStorage.getItem('newsletterShown')) {
+        setTimeout(function() {
+            const newsletterModal = document.getElementById('newsletterModal');
+            if (newsletterModal) {
+                const modal = new bootstrap.Modal(newsletterModal);
+                modal.show();
+                localStorage.setItem('newsletterShown', 'true');
+                
+                // Make sure the modal is properly hidden when closed
+                newsletterModal.addEventListener('hidden.bs.modal', function () {
+                    document.body.classList.remove('modal-open');
+                    const modalBackdrop = document.querySelector('.modal-backdrop');
+                    if (modalBackdrop) {
+                        modalBackdrop.remove();
+                    }
+                });
             }
+        }, 5000);
+    }
+
+    // Newsletter subscription form handling
+    const newsletterForm = document.getElementById('newsletterForm');
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const url = '/api/subscribe';
+            
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('newsletterSuccess').classList.remove('d-none');
+                    newsletterForm.reset();
+                    
+                    // Hide the form
+                    const formElements = newsletterForm.querySelectorAll('input, button');
+                    formElements.forEach(el => {
+                        el.parentElement.style.display = 'none';
+                    });
+                    
+                    // Close the modal after 2 seconds
+                    setTimeout(function() {
+                        const newsletterModal = document.getElementById('newsletterModal');
+                        if (newsletterModal) {
+                            const modal = bootstrap.Modal.getInstance(newsletterModal);
+                            if (modal) modal.hide();
+                        }
+                    }, 2000);
+                } else {
+                    document.getElementById('newsletterError').textContent = data.message;
+                    document.getElementById('newsletterError').classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('newsletterError').textContent = 'An unexpected error occurred. Please try again.';
+                document.getElementById('newsletterError').classList.remove('d-none');
+            });
         });
     }
     
+    // Navbar behavior on scroll
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+    
+    // Initiate the carousel
+    var heroCarousel = document.querySelector('#heroCarousel')
+    if (heroCarousel) {
+        var carousel = new bootstrap.Carousel(heroCarousel, {
+            interval: 5000,
+            wrap: true
+        })
+    }
+
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -24,8 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 80, // Adjust for navbar height
+                targetElement.scrollIntoView({
                     behavior: 'smooth'
                 });
             }
@@ -71,18 +150,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Newsletter form AJAX submission (backup for when jQuery might not be loaded)
-    const newsletterForm = document.getElementById('newsletter-form');
-    if (newsletterForm) {
-        newsletterForm.addEventListener('submit', function(e) {
+    const newsletterFormBackup = document.getElementById('newsletter-form');
+    if (newsletterFormBackup) {
+        newsletterFormBackup.addEventListener('submit', function(e) {
             // If jQuery is handling this, let it continue
             if (window.jQuery) return;
             
+            // Otherwise, handle with vanilla JS
             e.preventDefault();
-            
             const formData = new FormData(this);
-            const resultDiv = document.getElementById('newsletter-result');
+            const resultDiv = document.getElementById('newsletter-form-result');
             
-            fetch(this.getAttribute('action'), {
+            fetch('/api/subscribe', {
                 method: 'POST',
                 body: formData
             })
@@ -90,13 +169,14 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     resultDiv.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
-                    newsletterForm.reset();
+                    newsletterFormBackup.reset();
                 } else {
                     resultDiv.innerHTML = '<div class="alert alert-danger">' + data.message + '</div>';
                 }
             })
             .catch(error => {
-                resultDiv.innerHTML = '<div class="alert alert-danger">An error occurred. Please try again.</div>';
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<div class="alert alert-danger">An unexpected error occurred.</div>';
             });
         });
     }

@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request, jsonify, current_app
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
+import json
 
 from app import db
 from app.models import User, NewsletterSubscriber, Survey
-from app.forms import RegistrationForm, LoginForm, NewsletterForm, SurveyForm
+from app.forms import RegistrationForm, LoginForm, NewsletterForm, SurveyForm, ProfileForm
 from config import Config
 
 main = Blueprint('main', __name__)
@@ -56,18 +57,72 @@ def logout():
     logout_user()
     return redirect(url_for('main.index'))
 
+@main.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html', title=f"{current_user.username}'s Profile")
+
+@main.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = ProfileForm()
+    if form.validate_on_submit():
+        current_user.first_name = form.first_name.data
+        current_user.last_name = form.last_name.data
+        current_user.bio = form.bio.data
+        current_user.location = form.location.data
+        current_user.fitness_goals = form.fitness_goals.data
+        current_user.fitness_level = form.fitness_level.data
+        db.session.commit()
+        flash('Your profile has been updated!', 'success')
+        return redirect(url_for('main.profile'))
+    elif request.method == 'GET':
+        form.first_name.data = current_user.first_name
+        form.last_name.data = current_user.last_name
+        form.bio.data = current_user.bio
+        form.location.data = current_user.location
+        form.fitness_goals.data = current_user.fitness_goals
+        form.fitness_level.data = current_user.fitness_level
+    return render_template('edit_profile.html', title='Edit Profile', form=form)
+
+@main.route('/my-surveys')
+@login_required
+def my_surveys():
+    surveys = Survey.query.filter_by(user_id=current_user.id).order_by(Survey.submitted_at.desc()).all()
+    return render_template('my_surveys.html', title='My Surveys', surveys=surveys)
+
+@main.route('/shop')
+def shop():
+    newsletter_form = NewsletterForm()
+    return render_template('shop.html', title='Shop - Coming Soon', form=newsletter_form)
+
 @main.route('/survey', methods=['GET', 'POST'])
 def survey():
+    if current_user.is_authenticated and not current_user.is_admin:
+        existing_survey = Survey.query.filter_by(user_id=current_user.id).first()
+        if existing_survey:
+            flash('You have already completed the survey. Thank you for your feedback!', 'info')
+            return redirect(url_for('main.profile'))
+    
     form = SurveyForm()
     if form.validate_on_submit():
+        supplements_json = json.dumps(form.current_supplements.data)
+        
         survey = Survey(
             email=form.email.data,
             name=form.name.data,
-            current_supplements=form.current_supplements.data,
+            current_supplements=supplements_json,
             interest_level=int(form.interest_level.data),
             price_preference=form.price_preference.data,
             heard_from=form.heard_from.data,
-            additional_comments=form.additional_comments.data
+            additional_comments=form.additional_comments.data,
+            effectiveness_rating=int(form.effectiveness_rating.data),
+            value_rating=int(form.value_rating.data),
+            convenience_rating=int(form.convenience_rating.data),
+            specific_needs=form.specific_needs.data,
+            pain_points=form.pain_points.data,
+            expected_benefits=form.expected_benefits.data,
+            purchase_likelihood=int(form.purchase_likelihood.data)
         )
         if current_user.is_authenticated:
             survey.user_id = current_user.id
@@ -84,12 +139,10 @@ def thank_you():
 
 @main.route('/api/subscribe', methods=['POST'])
 def newsletter_subscribe():
-    # Create form without CSRF protection
     form = NewsletterForm(meta={'csrf': False})
     print("Newsletter subscription attempt:", request.form)
     
     if form.validate():
-        # Check if email already exists
         existing = NewsletterSubscriber.query.filter_by(email=form.email.data).first()
         if existing:
             return jsonify({'success': False, 'message': 'Email already subscribed'})

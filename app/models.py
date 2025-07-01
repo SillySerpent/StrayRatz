@@ -4,9 +4,7 @@ from flask_login import UserMixin
 
 from app import db, login_manager
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+# User loader moved to __init__.py
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -15,6 +13,14 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Profile fields
+    first_name = db.Column(db.String(64), nullable=True)
+    last_name = db.Column(db.String(64), nullable=True)
+    bio = db.Column(db.Text, nullable=True)
+    location = db.Column(db.String(128), nullable=True)
+    fitness_goals = db.Column(db.String(128), nullable=True)
+    fitness_level = db.Column(db.String(32), nullable=True)
     
     surveys = db.relationship('Survey', backref='user', lazy=True)
     
@@ -45,6 +51,16 @@ class Survey(db.Model):
     interest_level = db.Column(db.Integer, nullable=False)
     price_preference = db.Column(db.String(64), nullable=True)
     heard_from = db.Column(db.String(64), nullable=True)
+    
+    # Enhanced survey fields
+    effectiveness_rating = db.Column(db.Integer, nullable=True)
+    value_rating = db.Column(db.Integer, nullable=True)
+    convenience_rating = db.Column(db.Integer, nullable=True)
+    specific_needs = db.Column(db.Text, nullable=True)
+    pain_points = db.Column(db.Text, nullable=True)
+    expected_benefits = db.Column(db.Text, nullable=True)
+    purchase_likelihood = db.Column(db.Integer, nullable=True)
+    
     additional_comments = db.Column(db.Text, nullable=True)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
     

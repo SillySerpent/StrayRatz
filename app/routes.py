@@ -84,9 +84,11 @@ def thank_you():
 
 @main.route('/api/subscribe', methods=['POST'])
 def newsletter_subscribe():
-    form = NewsletterForm()
+    # Create form without CSRF protection
+    form = NewsletterForm(meta={'csrf': False})
     print("Newsletter subscription attempt:", request.form)
-    if form.validate_on_submit():
+    
+    if form.validate():
         # Check if email already exists
         existing = NewsletterSubscriber.query.filter_by(email=form.email.data).first()
         if existing:
@@ -98,8 +100,11 @@ def newsletter_subscribe():
         )
         db.session.add(subscriber)
         db.session.commit()
+        print("Successfully subscribed:", form.email.data)
         return jsonify({'success': True, 'message': 'Successfully subscribed to newsletter'})
-    return jsonify({'success': False, 'message': 'Invalid form data'})
+    
+    print("Form validation errors:", form.errors)
+    return jsonify({'success': False, 'message': 'Invalid form data. Please check your email format.'})
 
 @main.route('/privacy-policy')
 def privacy_policy():

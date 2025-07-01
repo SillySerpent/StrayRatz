@@ -201,7 +201,9 @@
             }
         });
         
-        // Show newsletter modal after 5 seconds
+        // Show newsletter modal after 5 seconds - reset localStorage for testing
+        localStorage.removeItem('newsletterModalShown'); // Remove this line in production
+        
         setTimeout(function() {
             if (!localStorage.getItem('newsletterModalShown')) {
                 $('#newsletterModal').modal('show');
@@ -213,10 +215,17 @@
         $('#modal-newsletter-form').on('submit', function(e) {
             e.preventDefault();
             
+            // Get form data
+            var name = $(this).find('input[name="name"]').val();
+            var email = $(this).find('input[name="email"]').val();
+            
             $.ajax({
                 type: 'POST',
                 url: "{{ url_for('main.newsletter_subscribe') }}",
-                data: $(this).serialize(),
+                data: {
+                    name: name,
+                    email: email
+                },
                 success: function(response) {
                     if (response.success) {
                         $('#modal-newsletter-result').html('<div class="alert alert-success">' + response.message + '</div>');
@@ -238,10 +247,15 @@
         $('#footer-newsletter-form').on('submit', function(e) {
             e.preventDefault();
             
+            // Get email from footer form
+            var email = $(this).find('input[name="email"]').val();
+            
             $.ajax({
                 type: 'POST',
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
+                url: "{{ url_for('main.newsletter_subscribe') }}",
+                data: {
+                    email: email
+                },
                 success: function(response) {
                     if (response.success) {
                         $('#footer-newsletter-result').html('<div class="text-success">' + response.message + '</div>');

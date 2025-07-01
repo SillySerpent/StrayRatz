@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Survey Response #{{ survey.id }}</h2>
+    <a href="{{ url_for('admin.surveys') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Surveys
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Respondent Information</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Name:</strong> {{ survey.name }}</p>
+                <p><strong>Email:</strong> {{ survey.email }}</p>
+                {% if survey.user %}
+                <p><strong>User Account:</strong> 
+                    <a href="{{ url_for('admin.users') }}">{{ survey.user.username }}</a>
+                </p>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <p><strong>Submitted:</strong> {{ survey.submitted_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p>
+                    <strong>Interest Level:</strong> 
+                    <span class="badge bg-{% if survey.interest_level >= 4 %}success{% elif survey.interest_level >= 3 %}info{% else %}secondary{% endif %}">
+                        {{ survey.interest_level }}/5
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Current Supplement Usage</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    {% if survey.current_supplements == 'none' %}
+                    <span class="badge bg-secondary">None</span>
+                    {% elif survey.current_supplements == 'preworkout' %}
+                    <span class="badge bg-primary">Pre-workout</span>
+                    {% elif survey.current_supplements == 'protein' %}
+                    <span class="badge bg-primary">Protein</span>
+                    {% elif survey.current_supplements == 'bcaa' %}
+                    <span class="badge bg-primary">BCAAs</span>
+                    {% elif survey.current_supplements == 'creatine' %}
+                    <span class="badge bg-primary">Creatine</span>
+                    {% elif survey.current_supplements == 'multiple' %}
+                    <span class="badge bg-warning">Multiple supplements</span>
+                    {% elif survey.current_supplements == 'other' %}
+                    <span class="badge bg-info">Other</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Price Preference</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    {% if survey.price_preference == 'under30' %}
+                    <span class="badge bg-success">Under $30</span>
+                    {% elif survey.price_preference == '30to40' %}
+                    <span class="badge bg-info">$30-$40</span>
+                    {% elif survey.price_preference == '40to50' %}
+                    <span class="badge bg-warning">$40-$50</span>
+                    {% elif survey.price_preference == '50to60' %}
+                    <span class="badge bg-danger">$50-$60</span>
+                    {% elif survey.price_preference == 'over60' %}
+                    <span class="badge bg-danger">Over $60</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">How They Heard About Us</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    {% if survey.heard_from == 'social' %}
+                    <i class="fas fa-hashtag me-2"></i> Social Media
+                    {% elif survey.heard_from == 'friend' %}
+                    <i class="fas fa-users me-2"></i> Friend or Family
+                    {% elif survey.heard_from == 'search' %}
+                    <i class="fas fa-search me-2"></i> Search Engine
+                    {% elif survey.heard_from == 'ad' %}
+                    <i class="fas fa-ad me-2"></i> Online Advertisement
+                    {% elif survey.heard_from == 'other' %}
+                    <i class="fas fa-question-circle me-2"></i> Other
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Additional Comments</h5>
+            </div>
+            <div class="card-body">
+                {% if survey.additional_comments %}
+                <p>{{ survey.additional_comments }}</p>
+                {% else %}
+                <p class="text-muted">No additional comments provided.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Survey Responses</h2>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">All Survey Responses</h5>
+        <button class="btn btn-sm btn-light" id="export-csv">
+            <i class="fas fa-download"></i> Export CSV
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="surveys-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Interest Level</th>
+                        <th>Price Preference</th>
+                        <th>Heard From</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for survey in surveys %}
+                        <tr>
+                            <td>{{ survey.id }}</td>
+                            <td>{{ survey.name }}</td>
+                            <td>{{ survey.email }}</td>
+                            <td>
+                                <span class="badge bg-{% if survey.interest_level >= 4 %}success{% elif survey.interest_level >= 3 %}info{% else %}secondary{% endif %}">
+                                    {{ survey.interest_level }}/5
+                                </span>
+                            </td>
+                            <td>
+                                {% if survey.price_preference == 'under30' %}
+                                    Under $30
+                                {% elif survey.price_preference == '30to40' %}
+                                    $30-$40
+                                {% elif survey.price_preference == '40to50' %}
+                                    $40-$50
+                                {% elif survey.price_preference == '50to60' %}
+                                    $50-$60
+                                {% elif survey.price_preference == 'over60' %}
+                                    Over $60
+                                {% else %}
+                                    {{ survey.price_preference }}
+                                {% endif %}
+                            </td>
+                            <td>{{ survey.heard_from|title }}</td>
+                            <td>{{ survey.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.view_survey', survey_id=survey.id) }}" class="btn btn-sm btn-primary">View</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+    $(document).ready(function() {
+        // Export CSV functionality
+        $('#export-csv').on('click', function() {
+            // Get table data
+            var table = document.getElementById('surveys-table');
+            var csv = [];
+            
+            // Header row
+            var header = [];
+            for (var i = 0; i < table.rows[0].cells.length - 1; i++) {
+                header.push(table.rows[0].cells[i].textContent);
+            }
+            csv.push(header.join(','));
+            
+            // Data rows
+            for (var i = 1; i < table.rows.length; i++) {
+                var row = [];
+                for (var j = 0; j < table.rows[i].cells.length - 1; j++) {
+                    var cellText = table.rows[i].cells[j].textContent.trim();
+                    row.push('"' + cellText + '"');
+                }
+                csv.push(row.join(','));
+            }
+            
+            // Create CSV file
+            var csvFile = new Blob([csv.join('\n')], {type: 'text/csv'});
+            
+            // Download link
+            var downloadLink = document.createElement('a');
+            downloadLink.download = 'survey_responses.csv';
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            
+            // Trigger download
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        });
+    });
+</script>
+{% endblock %} 

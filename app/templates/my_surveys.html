@@ -35,9 +35,18 @@
                                         <span>Email:</span>
                                         <span class="text-primary">{{ survey.email }}</span>
                                     </li>
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <span>Current Supplements:</span>
-                                        <span class="text-primary">{{ survey.current_supplements|capitalize }}</span>
+                                    <li class="list-group-item">
+                                        <span class="d-block mb-1">Current Supplements:</span>
+                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                        {% set supplements = survey.current_supplements|from_json %}
+                                        {% if supplements %}
+                                            {% for supplement in supplements %}
+                                                <span class="badge bg-secondary">{{ supplement|replace('_', ' ')|capitalize }}</span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-primary">None</span>
+                                        {% endif %}
+                                        </div>
                                     </li>
                                 </ul>
                             </div>

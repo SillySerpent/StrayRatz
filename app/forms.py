@@ -1,7 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField, RadioField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField, RadioField, SelectMultipleField, widgets
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from app.models import User
+
+class MultipleCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', 
@@ -56,14 +60,17 @@ class SurveyForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(max=64)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     
-    current_supplements = SelectField('What supplements do you currently use?',
+    current_supplements = MultipleCheckboxField('What supplements do you currently use? (Select all that apply)',
                                     choices=[
                                         ('none', 'None'),
                                         ('preworkout', 'Pre-workout'),
                                         ('protein', 'Protein'),
                                         ('bcaa', 'BCAAs'),
                                         ('creatine', 'Creatine'),
-                                        ('multiple', 'Multiple supplements'),
+                                        ('vitamins', 'Vitamins'),
+                                        ('fish_oil', 'Fish Oil/Omega-3'),
+                                        ('mass_gainer', 'Mass Gainer'),
+                                        ('fat_burners', 'Fat Burners'),
                                         ('other', 'Other')
                                     ])
     

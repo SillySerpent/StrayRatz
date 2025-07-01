@@ -1,19 +1,73 @@
 // StrayRatz JavaScript Functionality
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Navbar scroll behavior
-    const navbar = document.querySelector('.navbar');
-    
-    if (navbar) {
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
+    // Initialize AOS
+    AOS.init({
+        duration: 800,
+        easing: 'ease-in-out',
+        once: true
+    });
+
+    // Newsletter popup logic - show only once per session
+    const newsletterShown = sessionStorage.getItem('newsletterShown');
+    if (!newsletterShown) {
+        setTimeout(function() {
+            const newsletterModal = new bootstrap.Modal(document.getElementById('newsletterModal'));
+            newsletterModal.show();
+            sessionStorage.setItem('newsletterShown', 'true');
+        }, 5000);
+    }
+
+    // Newsletter subscription form handling
+    const newsletterForm = document.getElementById('newsletterForm');
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const url = '/api/subscribe';
+            
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('newsletterSuccess').classList.remove('d-none');
+                    document.getElementById('newsletterForm').classList.add('d-none');
+                } else {
+                    document.getElementById('newsletterError').textContent = data.message;
+                    document.getElementById('newsletterError').classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('newsletterError').textContent = 'An unexpected error occurred. Please try again.';
+                document.getElementById('newsletterError').classList.remove('d-none');
+            });
         });
     }
     
+    // Navbar behavior on scroll
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+    
+    // Initiate the carousel
+    var heroCarousel = document.querySelector('#heroCarousel')
+    if (heroCarousel) {
+        var carousel = new bootstrap.Carousel(heroCarousel, {
+            interval: 5000,
+            wrap: true
+        })
+    }
+
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -71,9 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Newsletter form AJAX submission (backup for when jQuery might not be loaded)
-    const newsletterForm = document.getElementById('newsletter-form');
-    if (newsletterForm) {
-        newsletterForm.addEventListener('submit', function(e) {
+    const newsletterFormBackup = document.getElementById('newsletter-form');
+    if (newsletterFormBackup) {
+        newsletterFormBackup.addEventListener('submit', function(e) {
             // If jQuery is handling this, let it continue
             if (window.jQuery) return;
             
@@ -90,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     resultDiv.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
-                    newsletterForm.reset();
+                    newsletterFormBackup.reset();
                 } else {
                     resultDiv.innerHTML = '<div class="alert alert-danger">' + data.message + '</div>';
                 }

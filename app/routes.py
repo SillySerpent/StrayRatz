@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, url_for, flash, redirect, request, jsonify, current_app
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
+import json
 
 from app import db
 from app.models import User, NewsletterSubscriber, Survey
@@ -90,19 +91,25 @@ def my_surveys():
     surveys = Survey.query.filter_by(user_id=current_user.id).order_by(Survey.submitted_at.desc()).all()
     return render_template('my_surveys.html', title='My Surveys', surveys=surveys)
 
+@main.route('/shop')
+def shop():
+    newsletter_form = NewsletterForm()
+    return render_template('shop.html', title='Shop - Coming Soon', form=newsletter_form)
+
 @main.route('/survey', methods=['GET', 'POST'])
 def survey():
     form = SurveyForm()
     if form.validate_on_submit():
+        supplements_json = json.dumps(form.current_supplements.data)
+        
         survey = Survey(
             email=form.email.data,
             name=form.name.data,
-            current_supplements=form.current_supplements.data,
+            current_supplements=supplements_json,
             interest_level=int(form.interest_level.data),
             price_preference=form.price_preference.data,
             heard_from=form.heard_from.data,
             additional_comments=form.additional_comments.data,
-            # New enhanced fields
             effectiveness_rating=int(form.effectiveness_rating.data),
             value_rating=int(form.value_rating.data),
             convenience_rating=int(form.convenience_rating.data),
@@ -126,12 +133,10 @@ def thank_you():
 
 @main.route('/api/subscribe', methods=['POST'])
 def newsletter_subscribe():
-    # Create form without CSRF protection
     form = NewsletterForm(meta={'csrf': False})
     print("Newsletter subscription attempt:", request.form)
     
     if form.validate():
-        # Check if email already exists
         existing = NewsletterSubscriber.query.filter_by(email=form.email.data).first()
         if existing:
             return jsonify({'success': False, 'message': 'Email already subscribed'})

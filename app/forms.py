@@ -77,38 +77,38 @@ class SurveyForm(FlaskForm):
     interest_level = RadioField('How interested are you in an all-in-one supplement solution?',
                               choices=[
                                   ('1', 'Not interested'),
-                                  ('2', 'Slightly interested'),
-                                  ('3', 'Moderately interested'),
-                                  ('4', 'Very interested'),
-                                  ('5', 'Extremely interested')
+                                  ('2', 'Slightly'),
+                                  ('3', 'Moderate'),
+                                  ('4', 'Very'),
+                                  ('5', 'Extremely')
                               ], validators=[DataRequired()])
     
     # Enhanced rating fields
     effectiveness_rating = RadioField('How important is effectiveness to you when choosing supplements?',
                                    choices=[
-                                       ('1', 'Not important'),
-                                       ('2', 'Slightly important'),
-                                       ('3', 'Moderately important'),
-                                       ('4', 'Very important'),
-                                       ('5', 'Extremely important')
+                                       ('1', 'Not'),
+                                       ('2', 'Slightly'),
+                                       ('3', 'Moderate'),
+                                       ('4', 'Very'),
+                                       ('5', 'Extremely')
                                    ], validators=[DataRequired()])
     
     value_rating = RadioField('How important is value for money when choosing supplements?',
                            choices=[
-                               ('1', 'Not important'),
-                               ('2', 'Slightly important'),
-                               ('3', 'Moderately important'),
-                               ('4', 'Very important'),
-                               ('5', 'Extremely important')
+                               ('1', 'Not'),
+                               ('2', 'Slightly'),
+                               ('3', 'Moderate'),
+                               ('4', 'Very'),
+                               ('5', 'Extremely')
                            ], validators=[DataRequired()])
     
     convenience_rating = RadioField('How important is convenience when choosing supplements?',
                                  choices=[
-                                     ('1', 'Not important'),
-                                     ('2', 'Slightly important'),
-                                     ('3', 'Moderately important'),
-                                     ('4', 'Very important'),
-                                     ('5', 'Extremely important')
+                                     ('1', 'Not'),
+                                     ('2', 'Slightly'),
+                                     ('3', 'Moderate'),
+                                     ('4', 'Very'),
+                                     ('5', 'Extremely')
                                  ], validators=[DataRequired()])
     
     price_preference = SelectField('What price range would you consider reasonable for our all-in-one supplement?',
@@ -132,9 +132,9 @@ class SurveyForm(FlaskForm):
     purchase_likelihood = RadioField('How likely would you be to purchase our all-in-one supplement?',
                                   choices=[
                                       ('1', 'Very unlikely'),
-                                      ('2', 'Somewhat unlikely'),
+                                      ('2', 'Unlikely'),
                                       ('3', 'Neutral'),
-                                      ('4', 'Somewhat likely'),
+                                      ('4', 'Likely'),
                                       ('5', 'Very likely')
                                   ], validators=[DataRequired()])
     

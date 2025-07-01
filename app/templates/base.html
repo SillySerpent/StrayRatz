@@ -102,7 +102,7 @@
                     <i class="fas fa-envelope-open-text fa-3x text-primary mb-3"></i>
                     <h3 class="modal-title fw-bold" id="newsletterModalLabel">Join the StrayRatz Revolution</h3>
                     <p class="text-muted mb-4">Sign up for exclusive updates, early access, and special offers.</p>
-                    <form id="modal-newsletter-form" method="post" action="{{ url_for('main.newsletter_subscribe') }}">
+                    <form id="newsletterForm">
                         <div class="mb-3">
                             <input type="text" name="name" class="form-control form-control-lg" placeholder="Your Name (Optional)">
                         </div>
@@ -112,8 +112,11 @@
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary btn-lg">Subscribe</button>
                         </div>
+                        <div id="newsletterSuccess" class="alert alert-success mt-3 d-none">
+                            Thank you for subscribing to our newsletter!
+                        </div>
+                        <div id="newsletterError" class="alert alert-danger mt-3 d-none"></div>
                     </form>
-                    <div id="modal-newsletter-result" class="mt-3"></div>
                     <p class="small mt-4 text-muted">By subscribing, you agree to our <a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a>.</p>
                 </div>
             </div>
@@ -157,13 +160,13 @@
                 <div class="col-lg-4 col-md-6">
                     <h5 class="footer-heading">Newsletter</h5>
                     <p class="text-white-50 mb-3">Stay updated with our latest offers and product updates.</p>
-                    <form id="footer-newsletter-form" method="post" action="{{ url_for('main.newsletter_subscribe') }}" class="footer-subscribe-form">
+                    <form id="newsletter-form" method="post" action="{{ url_for('main.newsletter_subscribe') }}" class="footer-subscribe-form">
                         <div class="input-group">
                             <input type="email" name="email" class="form-control" placeholder="Your email" required>
                             <button class="btn btn-primary" type="submit">Subscribe</button>
                         </div>
                     </form>
-                    <div id="footer-newsletter-result" class="mt-2 small"></div>
+                    <div id="newsletter-form-result" class="mt-2 small"></div>
                 </div>
             </div>
             <hr class="footer-divider">
@@ -205,50 +208,8 @@
             }
         });
         
-        // Show newsletter modal after 5 seconds - reset localStorage for testing
-        localStorage.removeItem('newsletterModalShown'); // Remove this line in production
-        
-        setTimeout(function() {
-            if (!localStorage.getItem('newsletterModalShown')) {
-                $('#newsletterModal').modal('show');
-                localStorage.setItem('newsletterModalShown', 'true');
-            }
-        }, 5000);
-        
-        // Handle modal newsletter form submission
-        $('#modal-newsletter-form').on('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form data
-            var name = $(this).find('input[name="name"]').val();
-            var email = $(this).find('input[name="email"]').val();
-            
-            $.ajax({
-                type: 'POST',
-                url: "{{ url_for('main.newsletter_subscribe') }}",
-                data: {
-                    name: name,
-                    email: email
-                },
-                success: function(response) {
-                    if (response.success) {
-                        $('#modal-newsletter-result').html('<div class="alert alert-success">' + response.message + '</div>');
-                        $('#modal-newsletter-form')[0].reset();
-                        setTimeout(function() {
-                            $('#newsletterModal').modal('hide');
-                        }, 2000);
-                    } else {
-                        $('#modal-newsletter-result').html('<div class="alert alert-danger">' + response.message + '</div>');
-                    }
-                },
-                error: function() {
-                    $('#modal-newsletter-result').html('<div class="alert alert-danger">An error occurred. Please try again.</div>');
-                }
-            });
-        });
-        
         // Handle footer newsletter form submission
-        $('#footer-newsletter-form').on('submit', function(e) {
+        $('#newsletter-form').on('submit', function(e) {
             e.preventDefault();
             
             // Get email from footer form
@@ -262,14 +223,14 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        $('#footer-newsletter-result').html('<div class="text-success">' + response.message + '</div>');
-                        $('#footer-newsletter-form')[0].reset();
+                        $('#newsletter-form-result').html('<div class="text-success">' + response.message + '</div>');
+                        $('#newsletter-form')[0].reset();
                     } else {
-                        $('#footer-newsletter-result').html('<div class="text-danger">' + response.message + '</div>');
+                        $('#newsletter-form-result').html('<div class="text-danger">' + response.message + '</div>');
                     }
                 },
                 error: function() {
-                    $('#footer-newsletter-result').html('<div class="text-danger">An error occurred. Please try again.</div>');
+                    $('#newsletter-form-result').html('<div class="text-danger">An error occurred. Please try again.</div>');
                 }
             });
         });

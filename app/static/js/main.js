@@ -8,13 +8,24 @@ document.addEventListener('DOMContentLoaded', function() {
         once: true
     });
 
-    // Newsletter popup logic - show only once per session
-    const newsletterShown = sessionStorage.getItem('newsletterShown');
-    if (!newsletterShown) {
+    // Simple newsletter popup logic - show only once
+    if (!localStorage.getItem('newsletterShown')) {
         setTimeout(function() {
-            const newsletterModal = new bootstrap.Modal(document.getElementById('newsletterModal'));
-            newsletterModal.show();
-            sessionStorage.setItem('newsletterShown', 'true');
+            const newsletterModal = document.getElementById('newsletterModal');
+            if (newsletterModal) {
+                const modal = new bootstrap.Modal(newsletterModal);
+                modal.show();
+                localStorage.setItem('newsletterShown', 'true');
+                
+                // Make sure the modal is properly hidden when closed
+                newsletterModal.addEventListener('hidden.bs.modal', function () {
+                    document.body.classList.remove('modal-open');
+                    const modalBackdrop = document.querySelector('.modal-backdrop');
+                    if (modalBackdrop) {
+                        modalBackdrop.remove();
+                    }
+                });
+            }
         }, 5000);
     }
 
@@ -35,7 +46,22 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     document.getElementById('newsletterSuccess').classList.remove('d-none');
-                    document.getElementById('newsletterForm').classList.add('d-none');
+                    newsletterForm.reset();
+                    
+                    // Hide the form
+                    const formElements = newsletterForm.querySelectorAll('input, button');
+                    formElements.forEach(el => {
+                        el.parentElement.style.display = 'none';
+                    });
+                    
+                    // Close the modal after 2 seconds
+                    setTimeout(function() {
+                        const newsletterModal = document.getElementById('newsletterModal');
+                        if (newsletterModal) {
+                            const modal = bootstrap.Modal.getInstance(newsletterModal);
+                            if (modal) modal.hide();
+                        }
+                    }, 2000);
                 } else {
                     document.getElementById('newsletterError').textContent = data.message;
                     document.getElementById('newsletterError').classList.remove('d-none');
@@ -78,8 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 80, // Adjust for navbar height
+                targetElement.scrollIntoView({
                     behavior: 'smooth'
                 });
             }
@@ -131,12 +156,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // If jQuery is handling this, let it continue
             if (window.jQuery) return;
             
+            // Otherwise, handle with vanilla JS
             e.preventDefault();
-            
             const formData = new FormData(this);
-            const resultDiv = document.getElementById('newsletter-result');
+            const resultDiv = document.getElementById('newsletter-form-result');
             
-            fetch(this.getAttribute('action'), {
+            fetch('/api/subscribe', {
                 method: 'POST',
                 body: formData
             })
@@ -150,7 +175,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => {
-                resultDiv.innerHTML = '<div class="alert alert-danger">An error occurred. Please try again.</div>';
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<div class="alert alert-danger">An unexpected error occurred.</div>';
             });
         });
     }

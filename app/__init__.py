@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
-from config import Config
 import os
 import json
 from werkzeug.security import generate_password_hash
@@ -22,6 +21,9 @@ def create_app(config_class=None):
     if config_class:
         app.config.from_object(config_class)
     else:
+        # Fix the config import
+        import sys
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from config import Config
         app.config.from_object(Config)
 
@@ -32,6 +34,12 @@ def create_app(config_class=None):
     db.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
+    
+    # Define user loader function
+    from app.models import User
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
     
     # Exempt some routes from CSRF protection
     csrf.exempt('app.routes.newsletter_subscribe')
@@ -46,6 +54,10 @@ def create_app(config_class=None):
         except:
             return []
     
+    @app.template_filter('type')
+    def get_type(value):
+        return type(value).__name__
+    
     # Register blueprints
     from app.routes import main
     from app.admin import admin
@@ -58,7 +70,6 @@ def create_app(config_class=None):
         db.create_all()
         
         # Create default admin if no users exist
-        from app.models import User
         admin_user = User.query.filter_by(username='juju').first()
         if not admin_user:
             admin_user = User(

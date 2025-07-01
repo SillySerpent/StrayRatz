@@ -6,7 +6,8 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'jsdaglwbuh4piugeirablgjk4/twt/3t;j3glre48o;r4j43tj/er;gwpu'
     
     # Database configuration
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///site.db'
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'sqlite:///{os.path.join(base_dir, "instance", "site.db")}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Session lifetime

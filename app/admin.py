@@ -77,6 +77,16 @@ def surveys():
                           title='Survey Results',
                           surveys=all_surveys)
 
+@admin.route('/debug_surveys')
+@login_required
+@admin_required
+def debug_surveys():
+    # Get all surveys for debugging
+    all_surveys = Survey.query.order_by(Survey.submitted_at.desc()).all()
+    return render_template('admin/debug_surveys.html', 
+                          title='Survey Debug',
+                          surveys=all_surveys)
+
 @admin.route('/survey/<int:survey_id>')
 @login_required
 @admin_required

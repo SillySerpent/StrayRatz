@@ -98,6 +98,12 @@ def shop():
 
 @main.route('/survey', methods=['GET', 'POST'])
 def survey():
+    if current_user.is_authenticated and not current_user.is_admin:
+        existing_survey = Survey.query.filter_by(user_id=current_user.id).first()
+        if existing_survey:
+            flash('You have already completed the survey. Thank you for your feedback!', 'info')
+            return redirect(url_for('main.profile'))
+    
     form = SurveyForm()
     if form.validate_on_submit():
         supplements_json = json.dumps(form.current_supplements.data)

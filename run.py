@@ -1,7 +1,8 @@
 from app import create_app
 from datetime import datetime
+from config import DevelopmentConfig
 
-app = create_app()
+app = create_app(DevelopmentConfig)
 
 @app.context_processor
 def inject_now():

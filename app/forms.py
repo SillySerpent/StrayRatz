@@ -36,6 +36,33 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
+class RequestPasswordResetForm(FlaskForm):
+    email = StringField('Email', 
+                      validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+    
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is None:
+            raise ValidationError('There is no account with that email. You must register first.')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('New Password', 
+                           validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm New Password',
+                                   validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')
+
+class ResendConfirmationForm(FlaskForm):
+    email = StringField('Email', 
+                      validators=[DataRequired(), Email()])
+    submit = SubmitField('Resend Confirmation Email')
+    
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is None:
+            raise ValidationError('There is no account with that email. You must register first.')
+
 class ProfileForm(FlaskForm):
     first_name = StringField('First Name', validators=[Length(max=64)])
     last_name = StringField('Last Name', validators=[Length(max=64)])

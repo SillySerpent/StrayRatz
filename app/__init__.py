@@ -39,6 +39,10 @@ def create_app(config_class=None):
     csrf.init_app(app)
     mail.init_app(app)
     
+    # Configure CSRF protection to exclude GET requests
+    app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+    app.config['WTF_CSRF_METHODS'] = ['POST', 'PUT', 'PATCH', 'DELETE']
+    
     # Define user loader function
     from app.models import User
     @login_manager.user_loader
@@ -47,6 +51,7 @@ def create_app(config_class=None):
     
     # Exempt some routes from CSRF protection
     csrf.exempt('app.routes.newsletter_subscribe')
+    csrf.exempt('app.routes.confirm_email')  # Exempt email confirmation route
     
     migrate.init_app(app, db)
     

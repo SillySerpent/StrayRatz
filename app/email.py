@@ -46,7 +46,7 @@ def send_password_reset_email(user):
 def send_email_confirmation(user):
     """Send confirmation email to user"""
     token = user.generate_email_confirmation_token()
-    confirm_url = f"{current_app.config.get('SITE_URL', 'http://localhost:5000')}/confirm-email/{token}"
+    confirm_url = f"{current_app.config.get('SITE_URL', 'http://localhost:5001')}/simple-verify/{token}"
     html = render_template('email/confirmation.html', user=user, confirm_url=confirm_url)
     text = f"Hello {user.username},\n\nPlease confirm your email by clicking on the following link:\n\n{confirm_url}\n\nThank you,"
     

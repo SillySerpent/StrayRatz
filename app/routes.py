@@ -293,4 +293,84 @@ def terms_of_service():
 def about():
     from datetime import datetime
     now = datetime.now()
-    return render_template('about.html', title='About StrayRatz', now=now) 
+    return render_template('about.html', title='About StrayRatz', now=now)
+
+@main.route('/verify/<token>')
+def verify_email(token):
+    """Alternative email verification endpoint that should work even with CSRF protection"""
+    try:
+        from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        email = s.loads(token, salt='email-confirmation', max_age=86400)  # 24 hours
+        user = User.query.filter_by(email=email).first()
+        
+        if user is None:
+            return "Invalid user. Please contact support."
+        
+        if user.email_confirmed:
+            return "Email already confirmed. You can now <a href='/login'>log in</a>."
+        
+        user.email_confirmed = True
+        db.session.commit()
+        return "Your email has been successfully confirmed! You can now <a href='/login'>log in</a>."
+        
+    except SignatureExpired:
+        return "The confirmation link has expired. Please request a new confirmation email."
+    except BadSignature:
+        return "Invalid confirmation link. Please request a new confirmation email."
+        
+@main.route('/simple-verify/<token>')
+def simple_verify(token):
+    """Ultra-simple verification endpoint with minimal Flask dependencies"""
+    from flask import make_response
+    
+    try:
+        # Manual database connection to avoid potential middleware issues
+        from app import db
+        from app.models import User
+        from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+        
+        # Manually get the secret key to avoid potential issues with current_app
+        from flask import current_app
+        secret_key = current_app.config.get('SECRET_KEY', 'fallback-key')
+        
+        # Deserialize the token
+        s = URLSafeTimedSerializer(secret_key)
+        email = s.loads(token, salt='email-confirmation', max_age=86400)  # 24 hours
+        
+        # Find the user
+        user = User.query.filter_by(email=email).first()
+        
+        if not user:
+            return make_response("User not found. Please contact support.", 404)
+            
+        # Update user and commit
+        user.email_confirmed = True
+        db.session.commit()
+        
+        # Return a simple response
+        return make_response(f"""
+        <html>
+            <head><title>Email Verified</title></head>
+            <body>
+                <h1>Email Successfully Verified!</h1>
+                <p>Your email address has been confirmed.</p>
+                <p><a href="{current_app.config.get('SITE_URL', 'http://localhost:5001')}/login">Click here to login</a></p>
+            </body>
+        </html>
+        """)
+    except Exception as e:
+        return make_response(f"Error: {str(e)}", 500)
+
+@main.route('/test-access')
+def test_access():
+    """Simple route to test if the server is accessible without CSRF issues"""
+    return """
+    <html>
+        <head><title>Server Access Test</title></head>
+        <body>
+            <h1>Server Access Successful</h1>
+            <p>If you can see this page, the server is accessible and not blocking your requests.</p>
+        </body>
+    </html>
+    """ 

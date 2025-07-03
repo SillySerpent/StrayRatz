@@ -1,11 +1,44 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, SelectField, RadioField, SelectMultipleField, widgets
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Regexp
 from app.models import User
+import re
 
 class MultipleCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
+
+class PasswordComplexityValidator:
+    def __init__(self, message=None):
+        if message is None:
+            self.message = ('Password must be at least 8 characters long and contain at least '
+                          'one uppercase letter, one lowercase letter, and one number.')
+        else:
+            self.message = message
+            
+    def __call__(self, form, field):
+        password = field.data
+        
+        # Check length
+        if len(password) < 8:
+            raise ValidationError('Password must be at least 8 characters long.')
+            
+        # Check for at least one uppercase letter
+        if not re.search(r'[A-Z]', password):
+            raise ValidationError('Password must contain at least one uppercase letter.')
+            
+        # Check for at least one lowercase letter
+        if not re.search(r'[a-z]', password):
+            raise ValidationError('Password must contain at least one lowercase letter.')
+            
+        # Check for at least one digit
+        if not re.search(r'\d', password):
+            raise ValidationError('Password must contain at least one number.')
+            
+        # Removed special character requirement
+        #if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        #    raise ValidationError('Password must contain at least one special character (!@#$%^&*(),.?":{}|<>).')
+
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', 
@@ -13,7 +46,7 @@ class RegistrationForm(FlaskForm):
     email = StringField('Email',
                        validators=[DataRequired(), Email()])
     password = PasswordField('Password', 
-                            validators=[DataRequired()])
+                            validators=[DataRequired(), PasswordComplexityValidator()])
     confirm_password = PasswordField('Confirm Password',
                                     validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
@@ -48,7 +81,7 @@ class RequestPasswordResetForm(FlaskForm):
 
 class ResetPasswordForm(FlaskForm):
     password = PasswordField('New Password', 
-                           validators=[DataRequired()])
+                           validators=[DataRequired(), PasswordComplexityValidator()])
     confirm_password = PasswordField('Confirm New Password',
                                    validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Reset Password')

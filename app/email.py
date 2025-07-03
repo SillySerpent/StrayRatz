@@ -37,7 +37,7 @@ def send_email(subject, recipients, html_body, text_body=None):
 def send_password_reset_email(user):
     """Send password reset email to user"""
     token = user.generate_password_reset_token()
-    reset_url = f"{current_app.config.get('SITE_URL', 'http://localhost:5000')}/reset-password/{token}"
+    reset_url = f"{current_app.config.get('SITE_URL', 'http://127.0.0.1:5001')}/reset-password/{token}"
     html = render_template('email/reset_password.html', user=user, reset_url=reset_url)
     text = f"Hello {user.username},\n\nTo reset your password, visit the following link:\n\n{reset_url}\n\nIf you did not request a password reset, please ignore this message.\n\nThank you,"
     
@@ -46,7 +46,7 @@ def send_password_reset_email(user):
 def send_email_confirmation(user):
     """Send confirmation email to user"""
     token = user.generate_email_confirmation_token()
-    confirm_url = f"{current_app.config.get('SITE_URL', 'http://localhost:5001')}/simple-verify/{token}"
+    confirm_url = f"{current_app.config.get('SITE_URL', 'http://127.0.0.1:5001')}/simple-verify/{token}"
     html = render_template('email/confirmation.html', user=user, confirm_url=confirm_url)
     text = f"Hello {user.username},\n\nPlease confirm your email by clicking on the following link:\n\n{confirm_url}\n\nThank you,"
     

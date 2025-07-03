@@ -80,10 +80,28 @@
     <div class="navbar-spacer"></div>
 
     <main class="container mt-4">
+        {% if request.args.get('verified') == 'True' %}
+        <div class="alert alert-success d-flex align-items-center mb-4">
+            <i class="fas fa-check-circle me-3" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>Success!</strong> Your email has been successfully verified! You can now log in.
+            </div>
+        </div>
+        {% endif %}
+        
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
+                    {% if category == 'success' and 'verified' in message %}
+                    <div class="alert alert-success d-flex align-items-center mb-4">
+                        <i class="fas fa-check-circle me-3" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>Success!</strong> {{ message }}
+                        </div>
+                    </div>
+                    {% else %}
                     <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         {% endwith %}

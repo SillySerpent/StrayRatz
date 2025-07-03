@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for, flash, redirect, request, jsonify, current_app
+from flask import Blueprint, render_template, url_for, flash, redirect, request, jsonify, current_app, session
 from flask_login import login_user, current_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 import json
@@ -53,6 +53,11 @@ def register():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
+    
+    # Clear flash messages if this is a verification redirect
+    if request.args.get('verified') == 'True' and request.method == 'GET':
+        session.pop('_flashes', None)
+    
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -322,8 +327,6 @@ def verify_email(token):
 @main.route('/simple-verify/<token>')
 def simple_verify(token):
     """Ultra-simple verification endpoint with minimal Flask dependencies"""
-    from flask import make_response
-    
     try:
         # Manual database connection to avoid potential middleware issues
         from app import db
@@ -342,25 +345,25 @@ def simple_verify(token):
         user = User.query.filter_by(email=email).first()
         
         if not user:
-            return make_response("User not found. Please contact support.", 404)
+            flash('User not found. Please contact support.', 'danger')
+            return redirect(url_for('main.login'))
             
         # Update user and commit
         user.email_confirmed = True
         db.session.commit()
         
-        # Return a simple response
-        return make_response(f"""
-        <html>
-            <head><title>Email Verified</title></head>
-            <body>
-                <h1>Email Successfully Verified!</h1>
-                <p>Your email address has been confirmed.</p>
-                <p><a href="{current_app.config.get('SITE_URL', 'http://localhost:5001')}/login">Click here to login</a></p>
-            </body>
-        </html>
-        """)
+        # Redirect to login page with success parameter
+        return redirect(url_for('main.login', verified=True))
+        
+    except SignatureExpired:
+        flash('The email verification link has expired. Please request a new one.', 'warning')
+        return redirect(url_for('main.resend_confirmation'))
+    except BadSignature:
+        flash('Invalid verification link. Please request a new one.', 'danger')
+        return redirect(url_for('main.resend_confirmation'))
     except Exception as e:
-        return make_response(f"Error: {str(e)}", 500)
+        flash(f'An error occurred: {str(e)}', 'danger')
+        return redirect(url_for('main.login'))
 
 @main.route('/test-access')
 def test_access():

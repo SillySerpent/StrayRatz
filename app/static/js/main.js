@@ -38,9 +38,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(this);
             const url = '/api/subscribe';
             
+            // Add CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            formData.append('csrf_token', csrfToken);
+            
             fetch(url, {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
             })
             .then(response => response.json())
             .then(data => {
@@ -161,9 +168,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(this);
             const resultDiv = document.getElementById('newsletter-form-result');
             
+            // Add CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            formData.append('csrf_token', csrfToken);
+            
             fetch('/api/subscribe', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
             })
             .then(response => response.json())
             .then(data => {

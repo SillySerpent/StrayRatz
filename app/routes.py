@@ -8,6 +8,7 @@ from app.models import User, NewsletterSubscriber, Survey
 from app.forms import (RegistrationForm, LoginForm, NewsletterForm, SurveyForm, ProfileForm,
                       RequestPasswordResetForm, ResetPasswordForm, ResendConfirmationForm)
 from app.email import send_password_reset_email, send_email_confirmation
+from app import limiter
 from config import Config
 
 main = Blueprint('main', __name__)
@@ -21,6 +22,7 @@ def index():
     return render_template('index.html', title='StrayRatz - All-In-One Supplement', form=newsletter_form, now=now)
 
 @main.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per minute, 20 per hour")
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -50,6 +52,7 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 @main.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute, 20 per hour")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -82,6 +85,7 @@ def logout():
     return redirect(url_for('main.index'))
 
 @main.route('/reset-password-request', methods=['GET', 'POST'])
+@limiter.limit("3 per minute, 10 per hour")
 def reset_request():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -128,6 +132,7 @@ def reset_password(token):
     return render_template('reset_password.html', title='Reset Password', form=form)
 
 @main.route('/resend-confirmation', methods=['GET', 'POST'])
+@limiter.limit("3 per minute, 10 per hour")
 def resend_confirmation():
     if current_user.is_authenticated and current_user.email_confirmed:
         return redirect(url_for('main.index'))
@@ -228,6 +233,16 @@ def survey():
             return redirect(url_for('main.profile'))
     
     form = SurveyForm()
+    
+    # Autofill form with user data if authenticated
+    if current_user.is_authenticated and request.method == 'GET':
+        # Use username if first_name/last_name not available
+        if current_user.first_name:
+            form.name.data = f"{current_user.first_name} {current_user.last_name or ''}".strip()
+        else:
+            form.name.data = current_user.username
+        form.email.data = current_user.email
+        
     if form.validate_on_submit():
         supplements_json = json.dumps(form.current_supplements.data)
         
@@ -262,10 +277,10 @@ def thank_you():
 
 @main.route('/api/subscribe', methods=['POST'])
 def newsletter_subscribe():
-    form = NewsletterForm(meta={'csrf': False})
+    form = NewsletterForm()
     print("Newsletter subscription attempt:", request.form)
     
-    if form.validate():
+    if form.validate_on_submit():
         existing = NewsletterSubscriber.query.filter_by(email=form.email.data).first()
         if existing:
             return jsonify({'success': False, 'message': 'Email already subscribed'})

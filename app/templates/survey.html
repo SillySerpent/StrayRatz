@@ -25,14 +25,12 @@
                                 <div class="form-group">
                                     {{ form.name.label(class="form-label") }}
                                     {{ form.name(class="form-control") }}
-                                    <div class="invalid-feedback" id="name-error">Please provide your name.</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     {{ form.email.label(class="form-label") }}
                                     {{ form.email(class="form-control") }}
-                                    <div class="invalid-feedback" id="email-error">Please provide a valid email address.</div>
                                 </div>
                             </div>
                         </div>
@@ -253,30 +251,17 @@
         function validateSection(sectionNum) {
             let isValid = true;
             
-            // Reset all error messages
-            document.querySelectorAll('.invalid-feedback').forEach(el => {
-                el.classList.add('d-none');
-            });
-            
             // Section 1 validation
             if (sectionNum === '1') {
                 const nameInput = document.getElementById('name');
                 const emailInput = document.getElementById('email');
                 
                 if (!nameInput.value.trim()) {
-                    document.getElementById('name-error').classList.remove('d-none');
-                    nameInput.classList.add('is-invalid');
                     isValid = false;
-                } else {
-                    nameInput.classList.remove('is-invalid');
                 }
                 
                 if (!emailInput.value.trim() || !isValidEmail(emailInput.value)) {
-                    document.getElementById('email-error').classList.remove('d-none');
-                    emailInput.classList.add('is-invalid');
                     isValid = false;
-                } else {
-                    emailInput.classList.remove('is-invalid');
                 }
             }
             
@@ -284,25 +269,21 @@
             if (sectionNum === '2') {
                 // Check interest level
                 if (!isRadioSelected('interest_level')) {
-                    document.getElementById('interest-error').classList.remove('d-none');
                     isValid = false;
                 }
                 
                 // Check effectiveness rating
                 if (!isRadioSelected('effectiveness_rating')) {
-                    document.getElementById('effectiveness-error').classList.remove('d-none');
                     isValid = false;
                 }
                 
                 // Check value rating
                 if (!isRadioSelected('value_rating')) {
-                    document.getElementById('value-error').classList.remove('d-none');
                     isValid = false;
                 }
                 
                 // Check convenience rating
                 if (!isRadioSelected('convenience_rating')) {
-                    document.getElementById('convenience-error').classList.remove('d-none');
                     isValid = false;
                 }
             }
@@ -311,7 +292,6 @@
             if (sectionNum === '3') {
                 // Check purchase likelihood
                 if (!isRadioSelected('purchase_likelihood')) {
-                    document.getElementById('purchase-error').classList.remove('d-none');
                     isValid = false;
                 }
             }

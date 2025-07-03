@@ -10,8 +10,8 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'sqlite:///{os.path.join(base_dir, "instance", "site.db")}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # Session lifetime
-    PERMANENT_SESSION_LIFETIME = timedelta(days=7)
+    # Session lifetime (reduced for security)
+    PERMANENT_SESSION_LIFETIME = timedelta(days=1)
     
     # Admin account defaults - should be changed in production
     ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')

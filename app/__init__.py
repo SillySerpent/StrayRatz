@@ -4,6 +4,8 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 import json
 import sqlalchemy as sa
@@ -17,6 +19,11 @@ login_manager.login_message_category = 'info'
 migrate = Migrate()
 csrf = CSRFProtect()
 mail = Mail()
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
 
 def create_app(config_class=None):
     app = Flask(__name__)
@@ -38,6 +45,7 @@ def create_app(config_class=None):
     login_manager.init_app(app)
     csrf.init_app(app)
     mail.init_app(app)
+    limiter.init_app(app)
     
     # Configure CSRF protection to exclude GET requests
     app.config['WTF_CSRF_CHECK_DEFAULT'] = False
@@ -49,9 +57,34 @@ def create_app(config_class=None):
     def load_user(user_id):
         return User.query.get(int(user_id))
     
-    # Exempt some routes from CSRF protection
-    csrf.exempt('app.routes.newsletter_subscribe')
-    csrf.exempt('app.routes.confirm_email')  # Exempt email confirmation route
+    # Add security headers middleware
+    @app.after_request
+    def add_security_headers(response):
+        # Content Security Policy - restrict sources of content
+        response.headers['Content-Security-Policy'] = "default-src 'self'; " \
+                                                     "script-src 'self' 'unsafe-inline' https://code.jquery.com https://cdn.jsdelivr.net https://unpkg.com; " \
+                                                     "style-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://fonts.googleapis.com 'unsafe-inline'; " \
+                                                     "img-src 'self' data: https:; " \
+                                                     "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; " \
+                                                     "connect-src 'self'; " \
+                                                     "form-action 'self'"
+        
+        # Prevent clickjacking
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        
+        # Prevent MIME type sniffing
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        
+        # Enable browser XSS filtering
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        
+        # Control referrer information
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        
+        return response
+    
+    # Only exempt email confirmation route from CSRF protection
+    csrf.exempt('app.routes.confirm_email')  # Email confirmation needs exemption for direct link access
     
     migrate.init_app(app, db)
     
@@ -84,17 +117,25 @@ def create_app(config_class=None):
         if 'user' in inspector.get_table_names():
             columns = [col['name'] for col in inspector.get_columns('user')]
             
+            # Add columns safely using SQLAlchemy Core for schema modifications
+            conn = db.engine.connect()
+            
             # Add email_confirmed column if not exists
             if 'email_confirmed' not in columns:
-                db.engine.execute('ALTER TABLE user ADD COLUMN email_confirmed BOOLEAN DEFAULT FALSE')
+                with conn.begin():
+                    conn.execute(sa.text('ALTER TABLE user ADD COLUMN email_confirmed BOOLEAN DEFAULT FALSE'))
             
             # Add email_confirmation_token_created_at column if not exists
             if 'email_confirmation_token_created_at' not in columns:
-                db.engine.execute('ALTER TABLE user ADD COLUMN email_confirmation_token_created_at DATETIME')
+                with conn.begin():
+                    conn.execute(sa.text('ALTER TABLE user ADD COLUMN email_confirmation_token_created_at DATETIME'))
             
             # Add password_reset_token_created_at column if not exists
             if 'password_reset_token_created_at' not in columns:
-                db.engine.execute('ALTER TABLE user ADD COLUMN password_reset_token_created_at DATETIME')
+                with conn.begin():
+                    conn.execute(sa.text('ALTER TABLE user ADD COLUMN password_reset_token_created_at DATETIME'))
+            
+            conn.close()
         
         # Create default admin if no users exist
         admin_user = User.query.filter_by(username=app.config.get('ADMIN_USERNAME')).first()

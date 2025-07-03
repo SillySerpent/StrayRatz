@@ -35,7 +35,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-5. Access the application in your browser at `http://127.0.0.1:5000/`
+5. Access the application in your browser at `http://127.0.0.1:5001/`
 
 ## Default Admin Account
 

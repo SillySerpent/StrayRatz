@@ -80,10 +80,28 @@
     <div class="navbar-spacer"></div>
 
     <main class="container mt-4">
+        {% if request.args.get('verified') == 'True' %}
+        <div class="alert alert-success d-flex align-items-center mb-4">
+            <i class="fas fa-check-circle me-3" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>Success!</strong> Your email has been successfully verified! You can now log in.
+            </div>
+        </div>
+        {% endif %}
+        
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
+                    {% if category == 'success' and 'verified' in message %}
+                    <div class="alert alert-success d-flex align-items-center mb-4">
+                        <i class="fas fa-check-circle me-3" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>Success!</strong> {{ message }}
+                        </div>
+                    </div>
+                    {% else %}
                     <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         {% endwith %}
@@ -133,10 +151,10 @@
                     </div>
                     <p class="text-white-50 mb-4">The all-in-one supplement solution that saves you money. Pre-workout, protein, BCAAs, and creatine in one powerful formula.</p>
                     <div class="social-icons mb-4">
-                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.facebook.com/" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://twitter.com/" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com/" class="social-icon"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-6">
@@ -153,14 +171,14 @@
                     <ul class="footer-links">
                         <li><a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a></li>
                         <li><a href="{{ url_for('main.terms_of_service') }}">Terms of Service</a></li>
-                        <li><a href="#">Return Policy</a></li>
-                        <li><a href="#">FAQ</a></li>
+                        <li><a href="{{ url_for('main.terms_of_service') }}">Return Policy</a></li>
+                        <li><a href="{{ url_for('main.terms_of_service') }}">FAQ</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <h5 class="footer-heading">Newsletter</h5>
                     <p class="text-white-50 mb-3">Stay updated with our latest offers and product updates.</p>
-                    <form id="newsletter-form" method="post" action="{{ url_for('main.newsletter_subscribe') }}" class="footer-subscribe-form">
+                    <form id="newsletter-form" class="footer-subscribe-form">
                         <div class="input-group">
                             <input type="email" name="email" class="form-control" placeholder="Your email" required>
                             <button class="btn btn-primary" type="submit">Subscribe</button>

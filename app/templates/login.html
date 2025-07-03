@@ -35,6 +35,9 @@
                         {% else %}
                             {{ form.password(class="form-control") }}
                         {% endif %}
+                        <div class="mt-1 text-end">
+                            <a href="{{ url_for('main.reset_request') }}" class="text-muted">Forgot password?</a>
+                        </div>
                     </div>
                     <div class="mb-3 form-check">
                         {{ form.remember(class="form-check-input") }}
@@ -47,6 +50,10 @@
                 <div class="border-top mt-4 pt-3">
                     <small class="text-muted">
                         Need an account? <a href="{{ url_for('main.register') }}" class="ml-2">Sign Up Now</a>
+                    </small>
+                    <br>
+                    <small class="text-muted">
+                        Need to confirm your email? <a href="{{ url_for('main.resend_confirmation') }}" class="ml-2">Resend confirmation</a>
                     </small>
                 </div>
             </div>

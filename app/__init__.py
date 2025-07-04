@@ -184,9 +184,7 @@ def create_app(config_class=None):
                 db.session.add(admin_user)
                 db.session.commit()
                 
-                print(f"Default admin created: {admin_user.username}")
-                print(f"Default admin password: {default_password}")
-                print("Please change this password after first login!")
+                print(f"Default admin account created successfully.")
         except Exception as e:
             print(f"Error initializing database: {e}")
     

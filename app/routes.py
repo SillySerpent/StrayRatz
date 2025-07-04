@@ -391,4 +391,9 @@ def test_access():
             <p>If you can see this page, the server is accessible and not blocking your requests.</p>
         </body>
     </html>
-    """ 
+    """
+
+@main.route('/health')
+def health_check():
+    """Health check endpoint for Railway.com monitoring"""
+    return jsonify({"status": "healthy"}) 

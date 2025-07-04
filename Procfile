@@ -1,1 +1,1 @@
-web: gunicorn --chdir StrayRatz 'run:app' 
+web: gunicorn 'run:app' 

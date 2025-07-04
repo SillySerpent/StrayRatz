@@ -22,7 +22,7 @@ def index():
     return render_template('index.html', title='StrayRatz - All-In-One Supplement', form=newsletter_form, now=now)
 
 @main.route('/register', methods=['GET', 'POST'])
-@limiter.limit("5 per minute, 20 per hour")
+@limiter.limit("3 per minute, 10 per hour, 20 per day")
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -31,7 +31,7 @@ def register():
         user = User(
             username=form.username.data,
             email=form.email.data,
-            email_confirmed=not current_app.config.get('EMAIL_VERIFICATION_REQUIRED', True)
+            email_confirmed=True  # Temporarily auto-confirm all emails
         )
         user.set_password(form.password.data)
         db.session.add(user)
@@ -52,7 +52,7 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 @main.route('/login', methods=['GET', 'POST'])
-@limiter.limit("5 per minute, 20 per hour")
+@limiter.limit("5 per minute, 15 per hour, 30 per day")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))

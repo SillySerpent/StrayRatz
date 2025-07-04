@@ -19,17 +19,22 @@ def send_email(subject, recipients, html_body, text_body=None):
     # Skip sending emails if verification is disabled
     if not current_app.config.get('EMAIL_VERIFICATION_REQUIRED', True):
         print(f"Email sending skipped: Email verification disabled")
+        logging.info(f"Would have sent email: Subject: {subject}, To: {recipients}")
         return
     
     try:
-        app = current_app._get_current_object()
-        msg = Message(subject, recipients=recipients)
-        msg.html = html_body
-        if text_body:
-            msg.body = text_body
+        # Temporarily disabled actual email sending
+        print(f"Email sending temporarily disabled: Subject: {subject}, To: {recipients}")
+        logging.info(f"Email content (text): {text_body}")
+
+        # Uncomment to re-enable email sending:
+        # app = current_app._get_current_object()
+        # msg = Message(subject, recipients=recipients)
+        # msg.html = html_body
+        # if text_body:
+        #     msg.body = text_body
+        # Thread(target=send_async_email, args=(app, msg)).start()
         
-        # Send asynchronously
-        Thread(target=send_async_email, args=(app, msg)).start()
     except Exception as e:
         logging.error(f"Error preparing email: {str(e)}")
         print(f"Email preparation error: {str(e)}")

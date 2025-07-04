@@ -37,16 +37,8 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        # Send confirmation email if verification is required
-        if current_app.config.get('EMAIL_VERIFICATION_REQUIRED', True):
-            try:
-                send_email_confirmation(user)
-                flash('Your account has been created! Please check your email to verify your account.', 'success')
-            except Exception as e:
-                flash(f'Account created, but could not send verification email. Please contact support.', 'warning')
-                print(f"Email error: {str(e)}")
-        else:
-            flash('Your account has been created! You can now log in.', 'success')
+        # Email verification is disabled
+        flash('Your account has been created! You can now log in.', 'success')
             
         return redirect(url_for('main.login'))
     return render_template('register.html', title='Register', form=form)
@@ -65,11 +57,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
-            # Check if email is confirmed if verification is required
-            if not user.email_confirmed and not user.is_admin and current_app.config.get('EMAIL_VERIFICATION_REQUIRED', True):
-                flash('Please confirm your email address before logging in. Check your inbox for the confirmation link.', 'warning')
-                return redirect(url_for('main.resend_confirmation'))
-            
+            # Email verification check disabled
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
             if user.is_admin:

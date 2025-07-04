@@ -17,6 +17,11 @@
                         <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%" id="survey-progress"></div>
                     </div>
                     
+                    <!-- Alert for validation errors -->
+                    <div class="alert alert-danger mb-4 d-none" id="validation-alert">
+                        Please fix the highlighted errors before submitting the survey.
+                    </div>
+                    
                     <!-- Basic Info Section -->
                     <div class="survey-section active" id="section-1" data-progress="20">
                         <h5 class="section-title mb-4">Your Information</h5>
@@ -25,12 +30,14 @@
                                 <div class="form-group">
                                     {{ form.name.label(class="form-label") }}
                                     {{ form.name(class="form-control") }}
+                                    <div class="invalid-feedback d-none" id="name-error">Please provide your name.</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     {{ form.email.label(class="form-label") }}
                                     {{ form.email(class="form-control") }}
+                                    <div class="invalid-feedback d-none" id="email-error">Please provide a valid email address.</div>
                                 </div>
                             </div>
                         </div>
@@ -198,9 +205,56 @@
         const progressBar = document.getElementById('survey-progress');
         const nextButtons = document.querySelectorAll('.next-section');
         const prevButtons = document.querySelectorAll('.prev-section');
+        const surveyForm = document.getElementById('surveyForm');
+        const validationAlert = document.getElementById('validation-alert');
         
         // Initialize with first section active
         updateProgress(sections[0].dataset.progress);
+        
+        // Handle form submission
+        surveyForm.addEventListener('submit', function(e) {
+            // Validate all sections
+            let isValid = true;
+            let firstInvalidSection = null;
+            
+            // Validate section 1
+            if (!validateSection('1', false)) {
+                isValid = false;
+                firstInvalidSection = 0;
+            }
+            
+            // Validate section 2
+            if (!validateSection('2', false)) {
+                isValid = false;
+                if (firstInvalidSection === null) {
+                    firstInvalidSection = 1;
+                }
+            }
+            
+            // Validate section 3
+            if (!validateSection('3', false)) {
+                isValid = false;
+                if (firstInvalidSection === null) {
+                    firstInvalidSection = 2;
+                }
+            }
+            
+            if (!isValid) {
+                e.preventDefault(); // Prevent form submission
+                
+                // Show validation alert
+                validationAlert.classList.remove('d-none');
+                
+                // Show the first section with errors
+                sections.forEach(section => section.classList.remove('active'));
+                sections[firstInvalidSection].classList.add('active');
+                updateProgress(sections[firstInvalidSection].dataset.progress);
+                
+                // Scroll to top of form
+                const formTop = document.querySelector('.card').offsetTop;
+                window.scrollTo({top: formTop - 100, behavior: 'smooth'});
+            }
+        });
         
         // Handle next button clicks with validation
         nextButtons.forEach(button => {
@@ -210,11 +264,14 @@
                 const sectionNum = this.dataset.section;
                 
                 // Validate current section before proceeding
-                if (validateSection(sectionNum)) {
+                if (validateSection(sectionNum, true)) {
                     if (currentIndex < sections.length - 1) {
                         currentSection.classList.remove('active');
                         sections[currentIndex + 1].classList.add('active');
                         updateProgress(sections[currentIndex + 1].dataset.progress);
+                        
+                        // Hide validation alert if shown
+                        validationAlert.classList.add('d-none');
                         
                         // Scroll to top of form
                         const formTop = document.querySelector('.card').offsetTop;
@@ -235,6 +292,9 @@
                     sections[currentIndex - 1].classList.add('active');
                     updateProgress(sections[currentIndex - 1].dataset.progress);
                     
+                    // Hide validation alert if shown
+                    validationAlert.classList.add('d-none');
+                    
                     // Scroll to top of form
                     const formTop = document.querySelector('.card').offsetTop;
                     window.scrollTo({top: formTop - 100, behavior: 'smooth'});
@@ -248,8 +308,18 @@
         }
         
         // Validate each section before proceeding
-        function validateSection(sectionNum) {
+        function validateSection(sectionNum, showErrors) {
             let isValid = true;
+            
+            if (showErrors) {
+                // Reset all error messages
+                document.querySelectorAll('.invalid-feedback').forEach(el => {
+                    el.classList.add('d-none');
+                });
+                document.querySelectorAll('.form-control').forEach(el => {
+                    el.classList.remove('is-invalid');
+                });
+            }
             
             // Section 1 validation
             if (sectionNum === '1') {
@@ -257,10 +327,18 @@
                 const emailInput = document.getElementById('email');
                 
                 if (!nameInput.value.trim()) {
+                    if (showErrors) {
+                        document.getElementById('name-error').classList.remove('d-none');
+                        nameInput.classList.add('is-invalid');
+                    }
                     isValid = false;
                 }
                 
                 if (!emailInput.value.trim() || !isValidEmail(emailInput.value)) {
+                    if (showErrors) {
+                        document.getElementById('email-error').classList.remove('d-none');
+                        emailInput.classList.add('is-invalid');
+                    }
                     isValid = false;
                 }
             }
@@ -269,21 +347,33 @@
             if (sectionNum === '2') {
                 // Check interest level
                 if (!isRadioSelected('interest_level')) {
+                    if (showErrors) {
+                        document.getElementById('interest-error').classList.remove('d-none');
+                    }
                     isValid = false;
                 }
                 
                 // Check effectiveness rating
                 if (!isRadioSelected('effectiveness_rating')) {
+                    if (showErrors) {
+                        document.getElementById('effectiveness-error').classList.remove('d-none');
+                    }
                     isValid = false;
                 }
                 
                 // Check value rating
                 if (!isRadioSelected('value_rating')) {
+                    if (showErrors) {
+                        document.getElementById('value-error').classList.remove('d-none');
+                    }
                     isValid = false;
                 }
                 
                 // Check convenience rating
                 if (!isRadioSelected('convenience_rating')) {
+                    if (showErrors) {
+                        document.getElementById('convenience-error').classList.remove('d-none');
+                    }
                     isValid = false;
                 }
             }
@@ -292,6 +382,9 @@
             if (sectionNum === '3') {
                 // Check purchase likelihood
                 if (!isRadioSelected('purchase_likelihood')) {
+                    if (showErrors) {
+                        document.getElementById('purchase-error').classList.remove('d-none');
+                    }
                     isValid = false;
                 }
             }
@@ -388,10 +481,20 @@
         border-color: #198754;
     }
     
+    /* Error styling for radio groups */
+    .invalid-feedback:not(.d-none) + .rating-container,
+    .invalid-feedback:not(.d-none) ~ .rating-container {
+        border: 1px solid #dc3545;
+        border-radius: 5px;
+        padding: 5px;
+        background-color: rgba(220, 53, 69, 0.05);
+    }
+    
     .heard-from-options {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 10px;
+        margin-bottom: 20px;
     }
     .heard-option {
         position: relative;

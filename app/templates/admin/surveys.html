@@ -83,15 +83,23 @@
                             </td>
                             <td>
                                 {% if survey.price_preference == 'under30' %}
-                                <span class="badge bg-success">Under $30</span>
+                                <span class="badge bg-secondary">Under $30</span>
                                 {% elif survey.price_preference == '30to40' %}
-                                <span class="badge bg-info">$30-$40</span>
+                                <span class="badge bg-secondary">$30-$40</span>
                                 {% elif survey.price_preference == '40to50' %}
-                                <span class="badge bg-warning">$40-$50</span>
+                                <span class="badge bg-secondary">$40-$50</span>
                                 {% elif survey.price_preference == '50to60' %}
-                                <span class="badge bg-danger">$50-$60</span>
+                                <span class="badge bg-success">$50-$60</span>
+                                {% elif survey.price_preference == '60to70' %}
+                                <span class="badge bg-info">$60-$70</span>
+                                {% elif survey.price_preference == '70to80' %}
+                                <span class="badge bg-warning">$70-$80</span>
+                                {% elif survey.price_preference == '80to90' %}
+                                <span class="badge bg-danger">$80-$90</span>
+                                {% elif survey.price_preference == 'over90' %}
+                                <span class="badge bg-danger">Over $90</span>
                                 {% elif survey.price_preference == 'over60' %}
-                                <span class="badge bg-danger">Over $60</span>
+                                <span class="badge bg-secondary">Over $60</span>
                                 {% else %}
                                 <span class="badge bg-secondary">{{ survey.price_preference }}</span>
                                 {% endif %}

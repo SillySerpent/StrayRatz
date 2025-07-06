@@ -172,7 +172,7 @@ def create_app(config_class=None):
             if not admin_user:
                 admin_user = User(
                     username=app.config.get('ADMIN_USERNAME', 'admin'),
-                    email=app.config.get('ADMIN_EMAIL', 'admin@strayratz.com'),
+                    email=app.config.get('ADMIN_EMAIL', 'admin@hydrafuel.com'),
                     is_admin=True,
                     email_confirmed=True
                 )

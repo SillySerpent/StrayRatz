@@ -1,4 +1,4 @@
-// StrayRatz JavaScript Functionality
+// HydraFuel JavaScript Functionality
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize AOS

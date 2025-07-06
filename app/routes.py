@@ -19,7 +19,7 @@ def index():
     from datetime import datetime
     newsletter_form = NewsletterForm()
     now = datetime.now()
-    return render_template('index.html', title='StrayRatz - All-In-One Supplement', form=newsletter_form, now=now)
+    return render_template('index.html', title='Hydra Fuel - All-In-One Supplement', form=newsletter_form, now=now)
 
 @main.route('/register', methods=['GET', 'POST'])
 @limiter.limit("3 per minute, 10 per hour, 20 per day")
@@ -301,7 +301,7 @@ def terms_of_service():
 def about():
     from datetime import datetime
     now = datetime.now()
-    return render_template('about.html', title='About StrayRatz', now=now)
+    return render_template('about.html', title='About Hydra Fuel', now=now)
 
 @main.route('/verify/<token>')
 def verify_email(token):

@@ -173,11 +173,11 @@ class SurveyForm(FlaskForm):
     
     price_preference = SelectField('What price range would you consider reasonable for our all-in-one supplement?',
                                  choices=[
-                                     ('under30', 'Under $30'),
-                                     ('30to40', '$30-$40'),
-                                     ('40to50', '$40-$50'),
                                      ('50to60', '$50-$60'),
-                                     ('over60', 'Over $60')
+                                     ('60to70', '$60-$70'),
+                                     ('70to80', '$70-$80'),
+                                     ('80to90', '$80-$90'),
+                                     ('over90', 'Over $90')
                                  ])
     
     specific_needs = TextAreaField('What specific needs are you looking to address with supplements?',
@@ -198,7 +198,7 @@ class SurveyForm(FlaskForm):
                                       ('5', 'Very likely')
                                   ], validators=[DataRequired()])
     
-    heard_from = RadioField('How did you hear about StrayRatz?',
+    heard_from = RadioField('How did you hear about Hydra Fuel?',
                           choices=[
                               ('social', 'Social Media'),
                               ('friend', 'Friend or Family'),

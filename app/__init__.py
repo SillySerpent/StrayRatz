@@ -22,7 +22,8 @@ mail = Mail()
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://"
+    storage_uri="memory://",
+    strategy="fixed-window"  # More strict rate limiting strategy
 )
 
 def create_app(config_class=None):
@@ -109,53 +110,82 @@ def create_app(config_class=None):
     
     # Create database tables
     with app.app_context():
-        # Create tables if they don't exist
-        db.create_all()
-        
-        # Check if columns exist and add them if they don't
-        inspector = sa.inspect(db.engine)
-        if 'user' in inspector.get_table_names():
-            columns = [col['name'] for col in inspector.get_columns('user')]
+        try:
+            # Create tables if they don't exist
+            db.create_all()
             
-            # Add columns safely using SQLAlchemy Core for schema modifications
-            conn = db.engine.connect()
+            # Check if columns exist and add them if they don't
+            inspector = sa.inspect(db.engine)
+            if 'user' in inspector.get_table_names():
+                columns = [col['name'] for col in inspector.get_columns('user')]
+                
+                # Add columns safely using SQLAlchemy Core for schema modifications
+                try:
+                    conn = db.engine.connect()
+                    
+                    # Add email_confirmed column if not exists
+                    if 'email_confirmed' not in columns:
+                        with conn.begin():
+                            conn.execute(sa.text('ALTER TABLE user ADD COLUMN email_confirmed BOOLEAN DEFAULT FALSE'))
+                    
+                    # Add email_confirmation_token_created_at column if not exists
+                    if 'email_confirmation_token_created_at' not in columns:
+                        with conn.begin():
+                            conn.execute(sa.text('ALTER TABLE user ADD COLUMN email_confirmation_token_created_at DATETIME'))
+                    
+                    # Add password_reset_token_created_at column if not exists
+                    if 'password_reset_token_created_at' not in columns:
+                        with conn.begin():
+                            conn.execute(sa.text('ALTER TABLE user ADD COLUMN password_reset_token_created_at DATETIME'))
+                    
+                    # Add profile fields if they don't exist
+                    if 'first_name' not in columns:
+                        with conn.begin():
+                            conn.execute(sa.text('ALTER TABLE user ADD COLUMN first_name VARCHAR(64)'))
+                    
+                    if 'last_name' not in columns:
+                        with conn.begin():
+                            conn.execute(sa.text('ALTER TABLE user ADD COLUMN last_name VARCHAR(64)'))
+                    
+                    if 'bio' not in columns:
+                        with conn.begin():
+                            conn.execute(sa.text('ALTER TABLE user ADD COLUMN bio TEXT'))
+                    
+                    if 'location' not in columns:
+                        with conn.begin():
+                            conn.execute(sa.text('ALTER TABLE user ADD COLUMN location VARCHAR(128)'))
+                    
+                    if 'fitness_goals' not in columns:
+                        with conn.begin():
+                            conn.execute(sa.text('ALTER TABLE user ADD COLUMN fitness_goals VARCHAR(128)'))
+                    
+                    if 'fitness_level' not in columns:
+                        with conn.begin():
+                            conn.execute(sa.text('ALTER TABLE user ADD COLUMN fitness_level VARCHAR(32)'))
+                        
+                    conn.close()
+                except Exception as e:
+                    print(f"Error adding columns: {e}")
             
-            # Add email_confirmed column if not exists
-            if 'email_confirmed' not in columns:
-                with conn.begin():
-                    conn.execute(sa.text('ALTER TABLE user ADD COLUMN email_confirmed BOOLEAN DEFAULT FALSE'))
-            
-            # Add email_confirmation_token_created_at column if not exists
-            if 'email_confirmation_token_created_at' not in columns:
-                with conn.begin():
-                    conn.execute(sa.text('ALTER TABLE user ADD COLUMN email_confirmation_token_created_at DATETIME'))
-            
-            # Add password_reset_token_created_at column if not exists
-            if 'password_reset_token_created_at' not in columns:
-                with conn.begin():
-                    conn.execute(sa.text('ALTER TABLE user ADD COLUMN password_reset_token_created_at DATETIME'))
-            
-            conn.close()
-        
-        # Create default admin if no users exist
-        admin_user = User.query.filter_by(username=app.config.get('ADMIN_USERNAME')).first()
-        if not admin_user:
-            admin_user = User(
-                username=app.config.get('ADMIN_USERNAME', 'admin'),
-                email=app.config.get('ADMIN_EMAIL', 'admin@strayratz.com'),
-                is_admin=True,
-                email_confirmed=True
-            )
-            
-            # Set default password
-            default_password = app.config.get('ADMIN_PASSWORD', 'admin')
-            admin_user.password_hash = generate_password_hash(default_password)
-            
-            db.session.add(admin_user)
-            db.session.commit()
-            
-            print(f"Default admin created: {admin_user.username}")
-            print(f"Default admin password: {default_password}")
-            print("Please change this password after first login!")
+            # Create default admin if no users exist
+            admin_user = User.query.filter_by(username=app.config.get('ADMIN_USERNAME')).first()
+            if not admin_user:
+                admin_user = User(
+                    username=app.config.get('ADMIN_USERNAME', 'admin'),
+                    email=app.config.get('ADMIN_EMAIL', 'admin@hydrafuel.com'),
+                    is_admin=True,
+                    email_confirmed=True
+                )
+                
+                # Set default password
+                default_password = app.config.get('ADMIN_PASSWORD', 'admin')
+                admin_user.password_hash = generate_password_hash(default_password)
+                
+                db.session.add(admin_user)
+                db.session.commit()
+                
+                print(f"Default admin account created successfully.")
+        except Exception as e:
+            print(f"Error initializing database: {e}")
     
     return app 

@@ -7,7 +7,13 @@ class Config:
     
     # Database configuration
     base_dir = os.path.abspath(os.path.dirname(__file__))
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'sqlite:///{os.path.join(base_dir, "instance", "site.db")}'
+    
+    # Handle Railway PostgreSQL URI format
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url and database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    
+    SQLALCHEMY_DATABASE_URI = database_url or f'sqlite:///{os.path.join(base_dir, "instance", "site.db")}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Session lifetime (reduced for security)
@@ -28,9 +34,18 @@ class Config:
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
     
     # Email verification settings
-    EMAIL_VERIFICATION_REQUIRED = os.environ.get('EMAIL_VERIFICATION_REQUIRED', 'True').lower() == 'true'
+    EMAIL_VERIFICATION_REQUIRED = os.environ.get('EMAIL_VERIFICATION_REQUIRED', 'False').lower() == 'true'
 
 class DevelopmentConfig(Config):
     DEBUG = True
     # Disable email verification in development mode
     EMAIL_VERIFICATION_REQUIRED = False
+
+class ProductionConfig(Config):
+    DEBUG = False
+    TESTING = False
+    # Security settings for production
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_HTTPONLY = True

@@ -19,10 +19,10 @@ def index():
     from datetime import datetime
     newsletter_form = NewsletterForm()
     now = datetime.now()
-    return render_template('index.html', title='StrayRatz - All-In-One Supplement', form=newsletter_form, now=now)
+    return render_template('index.html', title='Hydra Fuel - All-In-One Supplement', form=newsletter_form, now=now)
 
 @main.route('/register', methods=['GET', 'POST'])
-@limiter.limit("5 per minute, 20 per hour")
+@limiter.limit("3 per minute, 10 per hour, 20 per day")
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -31,28 +31,20 @@ def register():
         user = User(
             username=form.username.data,
             email=form.email.data,
-            email_confirmed=not current_app.config.get('EMAIL_VERIFICATION_REQUIRED', True)
+            email_confirmed=True  # Temporarily auto-confirm all emails
         )
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
         
-        # Send confirmation email if verification is required
-        if current_app.config.get('EMAIL_VERIFICATION_REQUIRED', True):
-            try:
-                send_email_confirmation(user)
-                flash('Your account has been created! Please check your email to verify your account.', 'success')
-            except Exception as e:
-                flash(f'Account created, but could not send verification email. Please contact support.', 'warning')
-                print(f"Email error: {str(e)}")
-        else:
-            flash('Your account has been created! You can now log in.', 'success')
+        # Email verification is disabled
+        flash('Your account has been created! You can now log in.', 'success')
             
         return redirect(url_for('main.login'))
     return render_template('register.html', title='Register', form=form)
 
 @main.route('/login', methods=['GET', 'POST'])
-@limiter.limit("5 per minute, 20 per hour")
+@limiter.limit("5 per minute, 15 per hour, 30 per day")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -65,11 +57,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
-            # Check if email is confirmed if verification is required
-            if not user.email_confirmed and not user.is_admin and current_app.config.get('EMAIL_VERIFICATION_REQUIRED', True):
-                flash('Please confirm your email address before logging in. Check your inbox for the confirmation link.', 'warning')
-                return redirect(url_for('main.resend_confirmation'))
-            
+            # Email verification check disabled
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
             if user.is_admin:
@@ -313,7 +301,7 @@ def terms_of_service():
 def about():
     from datetime import datetime
     now = datetime.now()
-    return render_template('about.html', title='About StrayRatz', now=now)
+    return render_template('about.html', title='About Hydra Fuel', now=now)
 
 @main.route('/verify/<token>')
 def verify_email(token):
@@ -391,4 +379,9 @@ def test_access():
             <p>If you can see this page, the server is accessible and not blocking your requests.</p>
         </body>
     </html>
-    """ 
+    """
+
+@main.route('/health')
+def health_check():
+    """Health check endpoint for Railway.com monitoring"""
+    return jsonify({"status": "healthy"}) 

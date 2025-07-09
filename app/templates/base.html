@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{% block title %}{{ title }}{% endblock %} - StrayRatz</title>
+    <title>{% block title %}{{ title }}{% endblock %} - Hydra Fuel</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -16,9 +16,9 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     {% block additional_head %}{% endblock %}
-    <meta name="description" content="StrayRatz - The ultimate all-in-one supplement combining pre-workout, protein, BCAAs, and creatine. Save money and maximize results.">
-    <meta property="og:title" content="{% block og_title %}{{ title }}{% endblock %} - StrayRatz">
-    <meta property="og:description" content="The new status symbol? Your physique. StrayRatz combines pre-workout, protein, BCAAs, and creatine in one powerful formula.">
+    <meta name="description" content="Hydra Fuel - The ultimate all-in-one supplement combining pre-workout, protein, BCAAs, and creatine. Save money and maximize results.">
+    <meta property="og:title" content="{% block og_title %}{{ title }}{% endblock %} - Hydra Fuel">
+    <meta property="og:description" content="The new status symbol? Your physique. Hydra Fuel combines pre-workout, protein, BCAAs, and creatine in one powerful formula.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.url }}">
 </head>
@@ -26,7 +26,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                <strong>StrayRatz</strong>
+                <strong>HydraFuel</strong>
                 <span class="brand-tagline d-none d-lg-inline-block">The new status symbol? Your physique.</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,7 +119,7 @@
                 </div>
                 <div class="modal-body text-center px-4 py-4">
                     <i class="fas fa-envelope-open-text fa-3x text-primary mb-3"></i>
-                    <h3 class="modal-title fw-bold" id="newsletterModalLabel">Join the StrayRatz Revolution</h3>
+                    <h3 class="modal-title fw-bold" id="newsletterModalLabel">Join the HydraFuel Revolution</h3>
                     <p class="text-muted mb-4">Sign up for exclusive updates, early access, and special offers.</p>
                     <form id="newsletterForm">
                         <div class="mb-3">
@@ -147,7 +147,7 @@
             <div class="row gy-4">
                 <div class="col-lg-4 col-md-6">
                     <div class="footer-brand mb-4">
-                        <h3 class="text-white">StrayRatz</h3>
+                        <h3 class="text-white">HydraFuel</h3>
                         <p class="brand-tagline-footer">The new status symbol? Your physique.</p>
                     </div>
                     <p class="text-white-50 mb-4">The all-in-one supplement solution that saves you money. Pre-workout, protein, BCAAs, and creatine in one powerful formula.</p>
@@ -191,7 +191,7 @@
             <hr class="footer-divider">
             <div class="row">
                 <div class="col-md-6">
-                    <p class="copyright">&copy; {{ now.year if now else 2023 }} StrayRatz. All rights reserved.</p>
+                    <p class="copyright">&copy; {{ now.year if now else 2023 }} HydraFuel. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p class="small text-white-50">All code and content strictly proprietary. Unauthorized use prohibited.</p>
